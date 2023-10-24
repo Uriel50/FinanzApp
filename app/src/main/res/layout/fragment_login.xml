@@ -1,0 +1,194 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.camu.finanzapp.login.LoginFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/background_gradient" />
+
+
+        <ImageView
+            android:id="@+id/imageViewLogo"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_logo_foreground"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/guideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardTextName"
+            app:layout_constraintTop_toTopOf="@id/guideline"
+            app:cardUseCompatPadding="true"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="5dp"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textNameInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:boxCornerRadiusBottomEnd="15dp"
+                app:boxCornerRadiusBottomStart="15dp"
+                app:boxCornerRadiusTopEnd="15dp"
+                app:boxCornerRadiusTopStart="15dp"
+                app:hintEnabled="true"
+                app:hintAnimationEnabled="true"
+                app:hintTextColor="@color/hintText"
+                style="@style/NoUnderlineEditText2"
+                android:hint="Correo">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editTextName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardTextPassword"
+            app:layout_constraintTop_toBottomOf="@id/cardTextName"
+            app:cardUseCompatPadding="true"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <com.google.android.material.textfield.TextInputLayout
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+
+                    android:layout_marginEnd="40dp"
+                    android:id="@+id/textKeyInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxCornerRadiusBottomEnd="15dp"
+                    app:boxCornerRadiusBottomStart="15dp"
+                    app:boxCornerRadiusTopEnd="15dp"
+                    app:boxCornerRadiusTopStart="15dp"
+                    app:hintEnabled="true"
+                    app:hintAnimationEnabled="true"
+                    app:hintTextColor="@color/hintText"
+                    style="@style/NoUnderlineEditText2"
+                    android:hint="Contraseña">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textVisiblePassword" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageButton
+                    android:id="@+id/esconder"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="15dp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@mipmap/ic_ojocruzado_foreground"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+
+                    />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
+
+
+
+
+
+
+        <Button
+            android:id="@+id/buttonSingIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Iniciar sesion"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cardTextPassword"
+            android:backgroundTint="@color/buttoncolor"
+
+            />
+
+        <TextView
+            android:id="@+id/txtRegister"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="2dp"
+            android:text="¿Eres nuevo?"
+            android:textColor="@android:color/darker_gray"
+            app:layout_constraintEnd_toEndOf="@+id/guidelinevertical"
+            app:layout_constraintTop_toBottomOf="@+id/buttonSingIn" />
+
+
+
+
+        <TextView
+            android:id="@+id/buttonRegister"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Regístrate aquí"
+            android:layout_marginStart="2dp"
+            android:textColor="@color/buttoncolor"
+            app:layout_constraintStart_toStartOf="@id/guidelinevertical"
+            app:layout_constraintTop_toBottomOf="@+id/buttonSingIn"
+             />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="254dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelinevertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.48" />    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</FrameLayout>

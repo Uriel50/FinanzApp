@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/imageBlancChart"
+        android:src="@mipmap/ic_blanc_chart_foreground"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    <TextView
+        android:id="@+id/textBlancChart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageBlancChart"
+        android:text="Aun no tenemos informacion de tus gatos"
+        android:textSize="10dp"
+        android:textColor="@color/disableText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textBlancChart"
+        android:text="Intenta agregando gastos"
+        android:textSize="10dp"
+        android:textColor="@color/disableText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
