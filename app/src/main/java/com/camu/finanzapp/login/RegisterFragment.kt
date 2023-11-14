@@ -1,7 +1,6 @@
 package com.camu.finanzapp.login
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
@@ -18,15 +17,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.R
-import com.camu.finanzapp.database.data.DBRepository
-import com.camu.finanzapp.database.data.db.DBDataBase
-import com.camu.finanzapp.database.data.db.model.DBEntity
+import com.camu.finanzapp.databaseusers.data.DBRepository
+import com.camu.finanzapp.databaseusers.data.db.DBDataBase
+import com.camu.finanzapp.databaseusers.data.db.model.DBEntity
 import com.camu.finanzapp.databinding.FragmentRegisterBinding
 import kotlinx.coroutines.launch
 import org.mindrot.jbcrypt.BCrypt
 import android.content.res.Resources
 import com.camu.finanzapp.alerts.CustomDialogFragment
-import com.camu.finanzapp.home.HomeActivity
 
 // Fragmento que representa la pantalla de registro
 class RegisterFragment : Fragment(R.layout.fragment_register) {

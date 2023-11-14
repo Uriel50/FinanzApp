@@ -7,5 +7,14 @@
     <color name="disable">#e0dcdc</color>
     <color name="hintText">#777779</color>
     <color name="disableText">#9a9a9a</color>
+    <color name="tabSelectedColor">#FF000000</color>
+    <color name="tabUnselectedColor">#9a9a9a</color>
+    <color name="lineColor">#c6c6c6</color>
+    <color name="tabUnselected">#e8e8e8</color>
+    <color name="tabSelected">#0078f9</color>
+
+    <color name="colorPastelOrange">#ee5350</color>
+
+
 
 </resources>

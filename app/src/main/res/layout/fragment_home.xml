@@ -20,6 +20,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:elevation="0dp"
             >
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -59,7 +61,7 @@
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteX="16dp"
             tools:layout_editor_absoluteY="0dp">
 
             <LinearLayout
@@ -70,11 +72,10 @@
 
 
                 <androidx.viewpager2.widget.ViewPager2
-                    android:layout_marginStart="25dp"
-                    android:layout_marginEnd="25dp"
                     android:id="@+id/view_pager"
                     android:layout_width="match_parent"
                     android:layout_height="160dp"
+
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/cardWelcome" />
 
@@ -139,11 +140,9 @@
                             android:layout_height="wrap_content"
                             android:layout_margin="8dp"
                             android:layout_marginBottom="5dp"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/textBalance"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            >
-                        </FrameLayout>
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textBalance"></FrameLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -196,10 +195,9 @@
                             android:layout_height="wrap_content"
                             android:layout_margin="8dp"
                             android:layout_marginBottom="5dp"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/textSubtitleSpend"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            >
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textSubtitleSpend">
 
                         </FrameLayout>
 

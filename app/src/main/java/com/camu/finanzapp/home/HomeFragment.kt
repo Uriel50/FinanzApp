@@ -5,14 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import android.view.View
-import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.camu.finanzapp.R
-import com.camu.finanzapp.analisis.NewStrategyFragment
 import com.camu.finanzapp.databinding.FragmentHomeBinding
-import com.camu.finanzapp.financedata.BalanceFragment
-import com.camu.finanzapp.financedata.ChartGeneralFragment
+import com.camu.finanzapp.home.financedata.BalanceFragment
+import com.camu.finanzapp.home.financedata.ChartGeneralFragment
 import com.camu.finanzapp.home.carrousel.CarouselAdapter
 import com.camu.finanzapp.home.carrousel.CarouselData
 import com.camu.finanzapp.perfil.PerfilActivity
@@ -20,7 +18,6 @@ import com.camu.finanzapp.util.GlobalData
 
 // Fragmento de la pantalla de inicio
 class HomeFragment : Fragment(R.layout.fragment_home) {
-
 
 
 
@@ -97,15 +94,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             transaction.addToBackStack(null)
             transaction.commit()
 
-
-
-
-
-
         }
 
 
-
+        //**********Graficas*******************************
 
         val containerChartGeneral = binding.frameChartGeneral
         val isChartGeneral = GlobalData.isChartGeneral

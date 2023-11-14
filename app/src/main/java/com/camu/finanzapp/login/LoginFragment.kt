@@ -1,5 +1,6 @@
 package com.camu.finanzapp.login
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,16 +10,25 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.R
 import com.camu.finanzapp.alerts.CustomDialogFragment
 import com.camu.finanzapp.databinding.FragmentLoginBinding
 import com.camu.finanzapp.home.HomeActivity
 import org.mindrot.jbcrypt.BCrypt
-import com.camu.finanzapp.database.data.DBRepository
-import com.camu.finanzapp.database.data.db.DBDataBase
+import com.camu.finanzapp.databaseusers.data.DBRepository
+import com.camu.finanzapp.databaseusers.data.db.DBDataBase
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 
 
@@ -26,6 +36,22 @@ import kotlinx.coroutines.launch
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private lateinit var binding: FragmentLoginBinding
+
+    //*************Google*************
+
+    private var _binding: FragmentLoginBinding? = null
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var firebaseAuth: FirebaseAuth
+
+    private val resultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            handleSignInResult(task)
+        }
+    }
+
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -125,6 +151,18 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
 
 
+        firebaseAuth = FirebaseAuth.getInstance()
+        configureGoogleSignIn()
+
+        binding.cardSignGoogle.setOnClickListener {
+            val signInIntent = googleSignInClient.signInIntent
+            resultLauncher.launch(signInIntent)
+        }
+
+
+
+
+
     }
 
     private fun saveUserEmail(email: String) {
@@ -133,6 +171,54 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         val editor = sharedPreferences.edit()
         editor.putString(sharedPrefKey, email)
         editor.apply()
+    }
+
+
+
+
+    private fun configureGoogleSignIn() {
+        // Aquí usas getString(R.string.default_web_client_id) para obtener el ID de cliente
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("655666775423-gfkkl7q6tu84j626knt9e7f0vd68o058.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+
+        val signInAccount = GoogleSignIn.getLastSignedInAccount(requireContext())
+        if (signInAccount != null && firebaseAuth.currentUser != null) {
+            Toast.makeText(context, "Usuario autenticado", Toast.LENGTH_LONG).show()
+            navigateToMain()
+        }
+    }
+
+    private fun handleSignInResult(task: Task<GoogleSignInAccount>) {
+        try {
+            val signInAccount = task.getResult(ApiException::class.java)
+            val authCredential = GoogleAuthProvider.getCredential(signInAccount.idToken, null)
+            firebaseAuth.signInWithCredential(authCredential)
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Tu cuenta se ha conectado con la aplicación", Toast.LENGTH_LONG).show()
+                    navigateToMain()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(context, "No se pudo completar el registro", Toast.LENGTH_LONG).show()
+                }
+        } catch (e: ApiException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun navigateToMain() {
+        // Implementa la navegación hacia la actividad principal o la pantalla que sigue después del inicio de sesión.
+
+        val intent = Intent(context, HomeActivity::class.java)
+        startActivity(intent)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
     companion object {
         @JvmStatic

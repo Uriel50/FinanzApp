@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".home.RegisterStrategyActivity">
+
+        <ImageButton
+            android:id="@+id/backButtonBudget"
+            android:src="@drawable/back_arrow"
+            android:backgroundTint="@color/white"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="centerCrop"
+
+            />
+
+        <TextView
+            android:id="@+id/textTitleNewBudget"
+            app:layout_constraintStart_toEndOf="@id/backButtonBudget"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline"
+            android:text="Añadir un presupuesto"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+
+
+        <ImageView
+            app:layout_constraintTop_toBottomOf="@+id/guideline"
+            android:layout_marginTop="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="290dp"
+            android:layout_height="185dp"
+            android:src="@mipmap/ic_card_budget_foreground"
+            android:scaleType="centerCrop"
+            />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutCard"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/guideline"
+            android:layout_marginTop="5dp"
+            android:layout_width="288dp"
+            android:layout_height="182dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toStartOf="@id/amountEditText"
+                android:text="$"
+                android:textSize="20dp"
+                android:layout_marginEnd="2dp"
+                android:textColor="@color/white"
+                app:layout_constraintTop_toBottomOf="@id/guidelineAmount"
+                android:layout_marginTop="7dp"
+                />
+
+            <EditText
+                android:id="@+id/amountEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="MXN"
+                app:layout_constraintTop_toBottomOf="@id/guidelineAmount"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="25dp"
+                android:textColorHint="@color/white"
+                style="@style/colorWhiteLineEditText"
+                android:textColor="@color/white"
+                android:theme="@style/colorWhiteLineEditText"
+
+                />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Nombre del presupuesto"
+                android:textColorHint="@color/white"
+                android:textSize="11dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/guidelineCardName"
+                android:layout_marginStart="26dp"
+                android:theme="@style/colorWhiteLineEditText"
+                android:textColor="@color/white"
+                >
+
+            </EditText>
+
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineCardName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="115dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineAmount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="38dp" />
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <Button
+            app:layout_constraintTop_toBottomOf="@id/layoutCard"
+            android:id="@+id/buttonRegister"
+            android:layout_marginTop="100dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Crear"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            android:backgroundTint="@color/buttoncolor"
+            />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="46dp" />
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+

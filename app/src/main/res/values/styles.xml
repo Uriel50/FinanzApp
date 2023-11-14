@@ -15,6 +15,12 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="colorWhiteLineEditText" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/disableText</item>
+        <item name="colorControlActivated">@color/white</item>
+        <item name="android:textColorHighlight">@color/hintText</item>
+    </style>
+
 
 
 
