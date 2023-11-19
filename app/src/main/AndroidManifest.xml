@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".databasereminders.application.RemindersDBApp"
+        android:name=".database.DBApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -19,6 +19,7 @@
         <activity
             android:name=".home.RegisterStrategyActivity"
             android:exported="false" />
+
         <activity
             android:name=".financedata.ChartGeneralActivity"
             android:exported="false" />
@@ -41,5 +42,6 @@
             android:name=".MainActivity"
             android:exported="true" />
     </application>
+
 
 </manifest>

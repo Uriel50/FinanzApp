@@ -5,8 +5,8 @@
     android:id="@+id/cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EEEEEE"
     android:fitsSystemWindows="true"
+    android:background="#EEEEEE"
     tools:context=".reminders.RemidersListFragment">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -61,7 +61,6 @@
             android:paddingBottom="0dp"
             android:paddingTop="0dp"
             android:elevation="10dp"
-
             />
 
         <androidx.constraintlayout.widget.Guideline

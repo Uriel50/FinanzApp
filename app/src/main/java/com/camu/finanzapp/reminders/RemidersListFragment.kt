@@ -16,6 +16,7 @@ import com.camu.finanzapp.databasereminders.data.db.model.ReminderEntity
 import com.camu.finanzapp.databaseusers.data.DBRepository
 import com.camu.finanzapp.databaseusers.data.db.DBDataBase
 import com.camu.finanzapp.databinding.FragmentRemidersListBinding
+import com.camu.finanzapp.util.GlobalData
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -32,6 +33,7 @@ class RemidersListFragment : Fragment(R.layout.fragment_remiders_list) {
 
 
     private lateinit var reminderAdapter: ReminderAdapter
+
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -62,11 +64,9 @@ class RemidersListFragment : Fragment(R.layout.fragment_remiders_list) {
                 message(text)
             })
             dialog.show(parentFragmentManager, "dialog")
-            Toast.makeText(requireContext(),"usuario autenticado en activity perfil", Toast.LENGTH_LONG).show()
         }
 
     }
-    
     private fun gameClicked(game: ReminderEntity){
         //Toast.makeText(this, "Click en el juego con id: ${game.id}", Toast.LENGTH_SHORT).show()
         val dialog = ReminderDialog(newReminder = false, reminder = game, updateUI = {
@@ -76,6 +76,8 @@ class RemidersListFragment : Fragment(R.layout.fragment_remiders_list) {
         })
         dialog.show(childFragmentManager, "dialog")
     }
+
+    var isReminder = GlobalData.isReminder
     private fun updateUI(){
         lifecycleScope.launch {
             val userEmail = getCurrentUserEmail()
@@ -85,10 +87,13 @@ class RemidersListFragment : Fragment(R.layout.fragment_remiders_list) {
                 // Hay por lo menos un registro
                 binding.tvSinRegistros.visibility = View.INVISIBLE
                 binding.blankReminderIcon.visibility = View.INVISIBLE
+                isReminder = true
+
             } else {
                 // No hay registros
                 binding.tvSinRegistros.visibility = View.VISIBLE
                 binding.blankReminderIcon.visibility = View.VISIBLE
+                isReminder = false
             }
             reminderAdapter.updateList(reminders)
         }

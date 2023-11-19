@@ -2,9 +2,12 @@ package com.camu.finanzapp.reminders
 
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.app.Dialog
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,6 +15,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
@@ -64,6 +68,12 @@ class ReminderDialog (
 
     private lateinit var firebaseAuth: FirebaseAuth
 
+    private lateinit var selectedDate: String
+
+    private lateinit var selectedTime:String
+
+    private  var isSelectedDate:Boolean= false
+    private  var isSelectedTime:Boolean= false
 
     //Se configura el diálogo inicial
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -116,7 +126,6 @@ class ReminderDialog (
             editTextMountReminder.setText(reminder.mount)
             editTextDateReminder.setText(reminder.date)
             editTextHourReminder.setText(reminder.hour)
-            editTextHourReminder.setText(reminder.mount)
 
             val indexToSelect = categoryItems.indexOfFirst { it.text == reminder.category }
 
@@ -132,12 +141,16 @@ class ReminderDialog (
         dialog = if (newReminder) {
             buildDialog("Guardar", "Cancelar", {
                 //Create (Guardar)
+                val category = spinnerItemSelected
                 reminder.title = binding.editTextNameReminder.text.toString()
-                reminder.category = spinnerItemSelected
+                reminder.category = category
                 reminder.mount = binding.editTextMountReminder.text.toString()
-                reminder.date = binding.editTextDateReminder.text.toString()
-                reminder.hour = binding.editTextHourReminder.text.toString()
-
+                if (isSelectedDate){
+                    reminder.date = selectedDate
+                }
+                if (isSelectedTime){
+                    reminder.hour = selectedTime
+                }
 
 
 
@@ -160,12 +173,16 @@ class ReminderDialog (
 
                     message("Recordatorio Guardado")
 
+                    isSelectedDate = false
+                    isSelectedTime = false
                     //Actualizar la UI
                     updateUI()
 
                 }catch(e: IOException){
                     e.printStackTrace()
                     message("Error al guardar el recordatorio")
+                    isSelectedDate = false
+                    isSelectedTime = false
                 }
             }, {
                 //Cancelar
@@ -173,11 +190,16 @@ class ReminderDialog (
         } else {
             buildDialog("Actualizar", "Borrar", {
                 //Update
+                val category = spinnerItemSelected
                 reminder.title = binding.editTextNameReminder.text.toString()
-                reminder.category = spinnerItemSelected
+                reminder.category = category
                 reminder.mount = binding.editTextMountReminder.text.toString()
-                reminder.date = binding.editTextDateReminder.text.toString()
-                reminder.hour = binding.editTextHourReminder.text.toString()
+                if (isSelectedDate){
+                    reminder.date = selectedDate
+                }
+                if (isSelectedTime){
+                    reminder.hour = selectedTime
+                }
 
                 try {
                     lifecycleScope.launch {
@@ -188,10 +210,14 @@ class ReminderDialog (
 
                     //Actualizar la UI
                     updateUI()
+                    isSelectedDate = false
+                    isSelectedTime = false
 
                 }catch(e: IOException){
                     e.printStackTrace()
                     message("Error al actualizar el recordatorio")
+                    isSelectedDate = false
+                    isSelectedTime = false
                 }
 
             }, {
@@ -245,92 +271,48 @@ class ReminderDialog (
         saveButton = alertDialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
         saveButton?.isEnabled = false
 
-        binding.editTextNameReminder.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        var NameEditText: EditText
+        var MountEditText: EditText
+        var DateEditText: EditText
+        var SpinnerCategory: Spinner
+        var TimeEditText: EditText
 
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                saveButton?.isEnabled = validateFields()
-            }
-        })
+        NameEditText = binding.editTextNameReminder
+        MountEditText = binding.editTextMountReminder
+        DateEditText =binding.editTextDateReminder
+        TimeEditText = binding.editTextHourReminder
 
 
+        binding.editTextDateReminder.setOnClickListener {
+            showDatePickerDialog()
 
-        binding.SpinnerCategory.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                isSpinnerOpen = true
-            }
-            false
-        }
-
-        binding.SpinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (isSpinnerOpen) {
-                    saveButton?.isEnabled = validateFields()
-                }
-                isSpinnerOpen = false
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-            }
         }
 
 
+        binding.editTextHourReminder.setOnClickListener {
+            showTimePickerDialog()
+        }
+        fun validateFields() {
+            val Name = NameEditText.text.toString()
+            val Mount = MountEditText.text.toString()
+            val Date = DateEditText.text.toString()
+            val Spinner = spinnerItemSelected
+            val Time = TimeEditText.text.toString()
+            val isFieldsNotEmpty = Name.isNotEmpty() && Mount.isNotEmpty() && Date.isNotEmpty() && Time.isNotEmpty() &&Spinner.isNotEmpty()
 
 
-        binding.editTextMountReminder.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            saveButton?.isEnabled = isFieldsNotEmpty
+        }
 
-            }
+        NameEditText.addTextChangedListener { validateFields() }
+        MountEditText.addTextChangedListener { validateFields() }
+        DateEditText.addTextChangedListener { validateFields() }
+        TimeEditText.addTextChangedListener { validateFields() }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                saveButton?.isEnabled = validateFields()
-            }
-
-        })
-
-        binding.editTextDateReminder.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                saveButton?.isEnabled = validateFields()
-            }
-
-        })
-        binding.editTextHourReminder.addTextChangedListener (object : TextWatcher{
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                saveButton?.isEnabled = validateFields()
-            }
-        })
 
     }
 
-    private fun validateFields() =
-        (binding.editTextNameReminder.text.toString().isNotEmpty() && binding.editTextMountReminder.text.toString()
-            .isNotEmpty() && binding.editTextDateReminder.text.toString().isNotEmpty()  && isSpinnerOpen && binding.editTextHourReminder.text.toString().isNotEmpty() )
+
     private fun getUserEmail(): String {
         val sharedPrefKey = "user_email"
 
@@ -339,6 +321,37 @@ class ReminderDialog (
 
         // Utilizar el contexto para acceder a SharedPreferences, si está disponible
         return sharedPreferences?.getString(sharedPrefKey, "") ?: ""
+    }
+
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val dpd = DatePickerDialog(requireContext(), { _, year, monthOfYear, dayOfMonth ->
+            // Usa 'year', 'monthOfYear', y 'dayOfMonth' para tu lógica
+            selectedDate = String.format("%02d/%02d/%d", dayOfMonth, monthOfYear + 1, year)
+            binding.editTextDateReminder.setText(selectedDate)
+            isSelectedDate = true
+        }, year, month, day)
+
+        dpd.show()
+    }
+
+    private fun showTimePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+
+        val tpd = TimePickerDialog(requireContext(), { _, selectedHour, selectedMinute ->
+            // Usa 'selectedHour' y 'selectedMinute' para tu lógica
+            selectedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
+            binding.editTextHourReminder.setText(selectedTime)
+            isSelectedTime = true
+        }, hour, minute, false)
+
+        tpd.show()
     }
 
     private fun buildDialog(

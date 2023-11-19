@@ -20,8 +20,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
             android:elevation="0dp"
+            android:backgroundTint="@color/logoColor"
+            app:cardCornerRadius="0dp"
             >
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,7 +30,7 @@
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:src="@mipmap/ic_logo_foreground"
+                    android:src="@mipmap/ic_logo_ligth_foreground"
                     android:layout_width="100dp"
                     android:layout_height="40dp"
                     app:layout_constraintStart_toStartOf="parent"
@@ -43,12 +44,14 @@
                 <ImageButton
                     android:id="@+id/perfilButton"
                     android:scaleType="centerCrop"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
                     android:layout_marginEnd="10dp"
                     android:background="@android:color/transparent"
                     android:src="@mipmap/ic_user_foreground"
                     android:layout_width="38dp"
                     android:layout_height="38dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     />
@@ -61,7 +64,7 @@
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp">
 
             <LinearLayout
@@ -75,9 +78,11 @@
                     android:id="@+id/view_pager"
                     android:layout_width="match_parent"
                     android:layout_height="160dp"
-
+                    android:background="#EEEEEE"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/cardWelcome" />
+                    app:layout_constraintTop_toBottomOf="@+id/cardWelcome"
+                    android:paddingBottom="10dp"
+                    />
 
                 <TextView
                     android:id="@+id/textTitleGeneral"
@@ -234,6 +239,7 @@
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <TextView
+                            android:id="@+id/textReminder"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
@@ -242,6 +248,58 @@
                             android:textSize="12dp"
                             app:layout_constraintStart_toEndOf="@+id/iconDateReminder"
                             app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/textSoonReminder"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginTop="10dp"
+                            android:text="Proximos a vencer:"
+                            android:textSize="11dp"
+                            android:visibility="invisible"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textReminder" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/listReminders"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginBottom="5dp"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textSoonReminder"></androidx.recyclerview.widget.RecyclerView>
+
+                        <ImageView
+                            android:id="@+id/blankReminderIcon"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_marginBottom="55dp"
+                            android:src="@mipmap/ic_reminder_icon_blank_foreground"
+                            android:visibility="invisible"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/textReminder" />
+
+                        <TextView
+                            android:id="@+id/tvSinRegistros"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical|center_horizontal"
+                            android:text="¡No lo olvides mas!\nAgenda tus facturas o transacciones"
+                            android:textAlignment="center"
+                            android:textSize="11sp"
+                            android:visibility="invisible"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/blankReminderIcon" />
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,7 @@
 package com.camu.finanzapp.reminders
 
+import android.app.Activity
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -7,6 +9,7 @@ import com.camu.finanzapp.R
 import com.camu.finanzapp.databasereminders.data.db.model.ReminderEntity
 import com.camu.finanzapp.databinding.ReminderItemBinding
 import com.camu.finanzapp.util.ReminderItem
+import kotlin.coroutines.coroutineContext
 
 
 class ReminderAdapter(private val onReminderClick: (ReminderEntity) -> Unit):RecyclerView.Adapter<ReminderAdapter.ViewHolder>() {
@@ -15,6 +18,7 @@ class ReminderAdapter(private val onReminderClick: (ReminderEntity) -> Unit):Rec
 
     class ViewHolder(private val binding: ReminderItemBinding):RecyclerView.ViewHolder(binding.root){
         val ivIcon = binding.ivIcon
+        val constraintBackground = binding.constraintBackground
 
         val categoryItems = listOf(
             ReminderItem("Renta/Hipoteca", R.mipmap.ic_reminder_rent_foreground),
@@ -32,7 +36,7 @@ class ReminderAdapter(private val onReminderClick: (ReminderEntity) -> Unit):Rec
                 tvTitle.text = reminder.title
                 tvCategory.text = reminder.category
                 tvDate.text = reminder.date
-                tvMount.text = reminder.mount
+                tvMount.text = "$"+reminder.mount
 
                 val foundReminderItem = categoryItems.find { it.text == reminder.category }
 
@@ -51,6 +55,7 @@ class ReminderAdapter(private val onReminderClick: (ReminderEntity) -> Unit):Rec
     }
 
     override fun getItemCount(): Int = reminders.size
+
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(reminders[position])

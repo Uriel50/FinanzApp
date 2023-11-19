@@ -1,20 +1,35 @@
 package com.camu.finanzapp.home
 
+import android.content.Context
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.camu.finanzapp.R
+import com.camu.finanzapp.databasereminders.data.ReminderRepository
+import com.camu.finanzapp.databasereminders.data.db.ReminderDatabase
+import com.camu.finanzapp.databasereminders.data.db.model.ReminderEntity
 import com.camu.finanzapp.databinding.FragmentHomeBinding
 import com.camu.finanzapp.home.financedata.BalanceFragment
 import com.camu.finanzapp.home.financedata.ChartGeneralFragment
 import com.camu.finanzapp.home.carrousel.CarouselAdapter
 import com.camu.finanzapp.home.carrousel.CarouselData
 import com.camu.finanzapp.perfil.PerfilActivity
+import com.camu.finanzapp.reminders.ReminderAdapter
+import com.camu.finanzapp.util.Constants.DATABASE_NAME_TABLE_REMINDER
 import com.camu.finanzapp.util.GlobalData
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 // Fragmento de la pantalla de inicio
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -22,12 +37,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
 
     private lateinit var binding: FragmentHomeBinding
+    private var remindersDates : List<String> = emptyList()
+    private lateinit var database: ReminderDatabase
+    private lateinit var repository: ReminderRepository
+    private lateinit var reminderAdapter: ReminderAdapter
+    private var reminders : List<ReminderEntity> = emptyList()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // Vincula la vista del fragmento con la clase FragmentHomeBinding
         binding = FragmentHomeBinding.bind(view)
+        database = ReminderDatabase.getDatabase(requireContext())
+        repository = ReminderRepository(database.ReminderDao())
+        reminderAdapter = ReminderAdapter(){}
+
 
 
         //********************Carrusel********************
@@ -123,7 +147,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
 
+        //*******Recordatorios*************
 
+        binding.listReminders.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = reminderAdapter
+        }
+
+        upDateUiReminder()
 
 
 
@@ -143,6 +174,82 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
 
 
+    }
+
+    private fun upDateUiReminder(){
+        lifecycleScope.launch {
+            val userEmail = getCurrentUserEmail()
+            reminders = repository.getAllReminders().filter { it.userReminderId == userEmail }
+
+
+            if(reminders.isNotEmpty()){
+                // Hay por lo menos un registro
+                binding.tvSinRegistros.visibility = View.INVISIBLE
+                binding.blankReminderIcon.visibility = View.INVISIBLE
+                binding.textSoonReminder.visibility = View.VISIBLE
+
+
+            } else {
+                // No hay registros
+                binding.tvSinRegistros.visibility = View.VISIBLE
+                binding.blankReminderIcon.visibility = View.VISIBLE
+                binding.textSoonReminder.visibility = View.INVISIBLE
+            }
+            //aqui se usa get nearestDate
+            reminderAdapter.updateList(getNearestDates(reminders))
+
+        }
+    }
+
+
+
+
+    fun getNearestDates(reminders: List<ReminderEntity>): List<ReminderEntity> {
+        val today = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val nearestEntities = mutableListOf<ReminderEntity>()
+
+        // Inicializa con un valor muy grande para garantizar que cualquier fecha real sea menor
+        var smallestDiff = Long.MAX_VALUE
+
+        for (reminder in reminders) {
+            dateFormat.parse(reminder.date)?.let {
+                val date = Calendar.getInstance().apply { time = it }
+                if (date.before(today)) {
+                    date.set(Calendar.YEAR, today.get(Calendar.YEAR))
+                }
+                val diff = Math.abs(date.timeInMillis - today.timeInMillis)
+
+                if (diff < smallestDiff) {
+                    smallestDiff = diff
+                    nearestEntities.clear()
+                    nearestEntities.add(reminder)
+                } else if (diff == smallestDiff) {
+                    nearestEntities.add(reminder)
+                } else {
+
+                }
+            }
+        }
+
+        return nearestEntities
+    }
+
+
+
+
+    private fun getCurrentUserEmail(): String {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        val googleSignInAccount = GoogleSignIn.getLastSignedInAccount(requireContext())
+
+        return when {
+            firebaseUser != null -> firebaseUser.email ?: ""
+            googleSignInAccount != null -> googleSignInAccount.email ?: ""
+            else -> {
+                val sharedPreferences = activity?.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                sharedPreferences?.getString("user_email", "") ?: ""
+            }
+        }
     }
 
     companion object {
