@@ -9,12 +9,9 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.camu.finanzapp.R
-import com.camu.finanzapp.databasereminders.application.RemindersDBApp
-import com.camu.finanzapp.databasereminders.data.ReminderRepository
-import com.camu.finanzapp.databasereminders.data.db.ReminderDatabase
-import com.camu.finanzapp.databasereminders.data.db.model.ReminderEntity
-import com.camu.finanzapp.databaseusers.data.DBRepository
-import com.camu.finanzapp.databaseusers.data.db.DBDataBase
+import com.camu.finanzapp.database.DataBase
+import com.camu.finanzapp.database.DataBaseRepository
+import com.camu.finanzapp.database.ReminderEntity
 import com.camu.finanzapp.databinding.FragmentRemidersListBinding
 import com.camu.finanzapp.util.GlobalData
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -28,8 +25,8 @@ class RemidersListFragment : Fragment(R.layout.fragment_remiders_list) {
     private lateinit var binding: FragmentRemidersListBinding
 
     private var reminders : List<ReminderEntity> = emptyList()
-    private lateinit var database: ReminderDatabase
-    private lateinit var repository: ReminderRepository
+    private lateinit var database: DataBase
+    private lateinit var repository: DataBaseRepository
 
 
     private lateinit var reminderAdapter: ReminderAdapter
@@ -41,8 +38,15 @@ class RemidersListFragment : Fragment(R.layout.fragment_remiders_list) {
         binding = FragmentRemidersListBinding.bind(view)
 
 
-        database = ReminderDatabase.getDatabase(requireContext())
-        repository = ReminderRepository(database.ReminderDao())
+        database = DataBase.getDataBase(requireContext())
+        repository = DataBaseRepository(
+            database.userDao(),
+            database.totalDao(),
+            database.reminderDao(),
+            database.incomeDao(),
+            database.expenseDao(),
+            database.budgetDao()
+        )
         reminderAdapter = ReminderAdapter(){ reminder ->
             gameClicked(reminder)
         }
@@ -81,7 +85,7 @@ class RemidersListFragment : Fragment(R.layout.fragment_remiders_list) {
     private fun updateUI(){
         lifecycleScope.launch {
             val userEmail = getCurrentUserEmail()
-            reminders = repository.getAllReminders().filter { it.userReminderId == userEmail }
+            reminders = repository.getAllReminders().filter { it.userEmailReminder == userEmail }
 
             if(reminders.isNotEmpty()){
                 // Hay por lo menos un registro

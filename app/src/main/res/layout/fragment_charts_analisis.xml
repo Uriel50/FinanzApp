@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".analisis.ChartsAnalisisFragment">
+    >
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -220,7 +221,7 @@
             android:layout_marginTop="25dp"
             android:id="@+id/view_pagerIncomeExpense"
             android:layout_width="0dp"
-            android:layout_height="200dp"
+            android:layout_height="320dp"
             app:layout_constraintTop_toBottomOf="@id/tabLayoutIncomeExpense"
             app:layout_constraintEnd_toEndOf="@id/guidelinevertical2"
             app:layout_constraintStart_toStartOf="@id/guidelinevertical1"

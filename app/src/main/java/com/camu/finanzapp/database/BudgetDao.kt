@@ -1,5 +1,6 @@
 package com.camu.finanzapp.database
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
@@ -8,6 +9,7 @@ import androidx.room.Update
 
 import com.camu.finanzapp.util.Constants
 
+@Dao
 interface BudgetDao {
 
     @Insert
@@ -18,7 +20,13 @@ interface BudgetDao {
     suspend fun getAllBudgets(): List<BudgetEntity>
 
     @Query("SELECT name_budget FROM ${Constants.DATABASE_NAME_TABLE_BUDGET} WHERE user_id = :user_id_budget LIMIT 1")
-    suspend fun getNameBudgetByEmail(user_id_budget: String): Long?
+    suspend fun getNameBudgetByEmail(user_id_budget: String): String?
+
+    @Query("SELECT budget_id FROM ${Constants.DATABASE_NAME_TABLE_BUDGET} WHERE user_email_budget = :email")
+    suspend fun getBudgetIdByEmail(email: String): Long?
+
+    @Query("SELECT * FROM ${Constants.DATABASE_NAME_TABLE_BUDGET} WHERE user_email_budget = :email")
+    suspend fun getBudgetByEmail(email: String): BudgetEntity
 
     //Update
     @Update

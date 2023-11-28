@@ -18,11 +18,15 @@ class DataBaseRepository(
     // Función suspendida para obtener la lista de usuarios desde la base de datos
     suspend fun getUser(): List<UserEntity> = userDao.getUser()
 
+    suspend fun getUserIdByEmail(email: String): Long? {
+        return userDao.getUserIdByEmail(email)
+    }
     suspend fun getAllUsers(): List<UserEntity> = userDao.getAllUsers()
 
     suspend fun getUserByEmail(email: String): UserEntity? {
         return userDao.getUserByEmail(email)
     }
+
 
     // Función suspendida para actualizar un usuario en la base de datos
     suspend fun updateUser(user: UserEntity) {
@@ -72,9 +76,11 @@ class DataBaseRepository(
         reminderDao.insertReminder(reminder)
     }
 
-    suspend fun insertReminder(title: String, category:String, date:String,hour: String, mount: Double, userId: Long){
-        reminderDao.insertReminder(ReminderEntity(reminderTitle = title, reminderCategory = category, reminderDate = date, reminderMount = mount, hour = hour, userId = userId, reminderId = 0))
+    suspend fun insertReminder(title: String, category:String, date:String,hour: String, mount: Double, userId: Long, userEmail: String){
+        reminderDao.insertReminder(ReminderEntity(reminderTitle = title, reminderCategory = category, reminderDate = date, reminderMount = mount, hour = hour, userId = userId, userEmailReminder = userEmail))
     }
+
+
 
     suspend fun getAllReminders(): List<ReminderEntity> = reminderDao.getAllReminders()
 
@@ -94,8 +100,15 @@ class DataBaseRepository(
     }
     suspend fun getAllBudgets(): List<BudgetEntity> = budgetDao.getAllBudgets()
 
-    suspend fun getBudgetByEmail(id_user: String): Long? {
+    suspend fun getBudgetIdByEmail(email: String): Long? {
+        return budgetDao.getBudgetIdByEmail(email)
+    }
+    suspend fun getBudgetNameByEmail(id_user: String): String? {
         return budgetDao.getNameBudgetByEmail(id_user)
+    }
+
+    suspend fun getBudgetByEmail(email: String): BudgetEntity? {
+        return budgetDao.getBudgetByEmail(email)
     }
     suspend fun updateBudget(budget: BudgetEntity){
         budgetDao.updateBudget(budget)
@@ -116,8 +129,26 @@ class DataBaseRepository(
         totalDao.updateTotals(total)
     }
 
-    suspend fun deleteBudget(total: TotalsEntity){
+    suspend fun deleteTotal(total: TotalsEntity){
         totalDao.deleteTotals(total)
     }
+    suspend fun getTotalById(idTotal: Long): TotalsEntity? {
+        return totalDao.getTotalById(idTotal)
+    }
 
+    suspend fun getTotalByEmail(email: String): TotalsEntity? {
+        return totalDao.getTotalByEmail(email)
+    }
+
+    suspend fun updateTotalIncome(newTotalIncome: Double, email: String) {
+        totalDao.updateTotalIncome(newTotalIncome, email)
+    }
+
+    suspend fun updateTotalExpense(newTotalExpense: Double, email: String) {
+        totalDao.updateTotalExpense(newTotalExpense, email)
+    }
+
+    suspend fun updateBalanceTotal(newBalanceTotal: Double, email: String) {
+        totalDao.updateBalanceTotal(newBalanceTotal, email)
+    }
 }

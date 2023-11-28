@@ -6,8 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import com.camu.finanzapp.databaseusers.data.DBRepository
-import com.camu.finanzapp.databaseusers.data.db.DBDataBase
+import com.camu.finanzapp.database.DataBase
+import com.camu.finanzapp.database.DataBaseRepository
 import com.camu.finanzapp.databinding.ActivityPerfilBinding
 import com.camu.finanzapp.login.LoginActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -48,16 +48,23 @@ class PerfilActivity : AppCompatActivity() {
 
         }
         else{
-            val database = DBDataBase.getDataBase(this)
-            val repository = DBRepository(database.userDao())
+            val database = DataBase.getDataBase(this)
+            val repository = DataBaseRepository(
+                database.userDao(),
+                database.totalDao(),
+                database.reminderDao(),
+                database.incomeDao(),
+                database.expenseDao(),
+                database.budgetDao()
+            )
             val userEmail = getUserEmail()
 
             lifecycleScope.launch {
                 val user = repository.getUserByEmail(userEmail)
-                val nickname = user?.nickname
-                val name = user?.name
-                val lastname = user?.lastname
-                val sex = user?.sex
+                val nickname = user?.userNickname
+                val name = user?.userName
+                val lastname = user?.userLastname
+                val sex = user?.userSex
 
                 binding.textName.text = name+" "+lastname
                 binding.textUser.text = "@"+nickname

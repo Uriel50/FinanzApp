@@ -13,11 +13,16 @@ interface UserDao {
     @Query("SELECT * FROM ${DATABASE_NAME_TABLE_USER}")
     suspend fun getUser(): List<UserEntity>
 
+    @Query("SELECT user_id FROM TablaUsers WHERE user_email = :email")
+    suspend fun getUserIdByEmail(email: String): Long?
+
     @Query("SELECT * FROM ${DATABASE_NAME_TABLE_USER}")
     suspend fun getAllUsers(): List<UserEntity>
 
     @Query("SELECT * FROM ${DATABASE_NAME_TABLE_USER} WHERE user_email = :email LIMIT 1")
     suspend fun getUserByEmail(email: String): UserEntity?
+
+
     @Update
     suspend fun updateUser(user: UserEntity)
 

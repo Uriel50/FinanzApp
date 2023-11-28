@@ -11,13 +11,13 @@ import com.camu.finanzapp.util.Constants
 data class UserEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "user_id")
-    val userId: Long,
+    val id: Long = 0,
 
     @ColumnInfo(name = "user_nickname")
     val userNickname: String,
+
     @ColumnInfo(name = "user_name")
     val userName: String,
-
     @ColumnInfo(name = "user_lastname")
     val userLastname: String,
 
@@ -39,13 +39,16 @@ data class UserEntity(
 data class BudgetEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "budget_id")
-    val budgetId: Long,
+    val budgetId: Long = 0,
 
     @ColumnInfo(name = "user_id")
-    val userId: Long,
+    var userId: Long,
 
     @ColumnInfo(name = "name_budget")
-    val nameBudget: String
+    var nameBudget: String,
+
+    @ColumnInfo(name = "user_email_budget")
+    var userEmailBudget: String
 )
 
 @Entity(tableName = Constants.DATABASE_NAME_TABLE_INCOME,
@@ -56,22 +59,25 @@ data class BudgetEntity(
 data class IncomeEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_income")
-    val idIncome: Long,
+    val idIncome: Long = 0,
 
     @ColumnInfo(name = "budget_id")
-    val budgetId: Long,
+    var budgetId: Long,
 
     @ColumnInfo(name = "income_name")
-    val incomeName: String,
+    var incomeName: String,
 
     @ColumnInfo(name = "income_mount")
-    val incomeMount: Double,
+    var incomeMount: Double,
 
     @ColumnInfo(name = "income_category")
-    val incomeCategory: String,
+    var incomeCategory: String,
 
     @ColumnInfo(name = "income_date")
-    val incomeDate: String
+    var incomeDate: String,
+
+    @ColumnInfo(name = "user_email_income")
+    var userEmailIncome: String
 )
 
 @Entity(tableName = Constants.DATABASE_NAME_TABLE_EXPENSE,
@@ -82,22 +88,25 @@ data class IncomeEntity(
 data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_expense")
-    val idExpense: Long,
+    val idExpense: Long = 0,
 
     @ColumnInfo(name = "budget_id")
-    val budgetId: Long,
+    var budgetId: Long,
 
     @ColumnInfo(name = "expense_name")
-    val expenseName: String,
+    var expenseName: String,
 
     @ColumnInfo(name = "expense_mount")
-    val expenseMount: Double,
+    var expenseMount: Double,
 
     @ColumnInfo(name = "expense_category")
-    val expenseCategory: String,
+    var expenseCategory: String,
 
     @ColumnInfo(name = "expense_date")
-    val expenseDate: String
+    var expenseDate: String,
+
+    @ColumnInfo(name = "user_email_expense")
+    var userEmailExpense: String
 )
 
 @Entity(tableName = Constants.DATABASE_NAME_TABLE_TOTAL,
@@ -108,19 +117,22 @@ data class ExpenseEntity(
 data class TotalsEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_total")
-    val idTotal: Long,
+    val idTotal: Long = 0,
 
     @ColumnInfo(name = "budget_id")
-    val budgetId: Long,
+    var budgetId: Long,
 
     @ColumnInfo(name = "total_income")
-    val totalIncome: Double,
+    var totalIncome: Double,
 
     @ColumnInfo(name = "total_expense")
-    val totalExpense: Double,
+    var totalExpense: Double,
 
     @ColumnInfo(name = "balance_total")
-    val balanceTotal: Double
+    var balanceTotal: Double,
+
+    @ColumnInfo(name = "user_email_total")
+    var userEmailTotal: String
 )
 
 @Entity(tableName = Constants.DATABASE_NAME_TABLE_REMINDER,
@@ -131,23 +143,28 @@ data class TotalsEntity(
 data class ReminderEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "reminder_id")
-    val reminderId: Long,
+    val reminderId: Long = 0,
 
     @ColumnInfo(name = "user_id")
-    val userId: Long,
+    var userId: Long,
 
     @ColumnInfo(name = "reminder_title")
-    val reminderTitle: String,
+    var reminderTitle: String,
 
     @ColumnInfo(name = "reminder_category")
-    val reminderCategory: String,
+    var reminderCategory: String,
 
     @ColumnInfo(name = "reminder_date")
-    val reminderDate: String,
+    var reminderDate: String,
 
     @ColumnInfo(name = "hour")
-    val hour: String,
+    var hour: String,
 
     @ColumnInfo(name = "reminder_mount")
-    val reminderMount: Double
+    var reminderMount: Double,
+
+    @ColumnInfo(name = "user_email_reminder")
+    var userEmailReminder: String
+
+
 )

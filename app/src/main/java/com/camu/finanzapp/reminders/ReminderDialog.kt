@@ -9,9 +9,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.icu.util.Calendar
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.MotionEvent
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Button
@@ -22,31 +20,31 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.R
-import com.camu.finanzapp.databasereminders.application.RemindersDBApp
-import com.camu.finanzapp.databasereminders.data.ReminderRepository
-import com.camu.finanzapp.databasereminders.data.db.ReminderDatabase
-import com.camu.finanzapp.databasereminders.data.db.model.ReminderEntity
-import com.camu.finanzapp.databaseusers.data.DBRepository
-import com.camu.finanzapp.databaseusers.data.db.DBDataBase
+import com.camu.finanzapp.database.DataBase
+import com.camu.finanzapp.database.DataBaseApplication
+import com.camu.finanzapp.database.DataBaseRepository
+import com.camu.finanzapp.database.ReminderEntity
 import com.camu.finanzapp.databinding.ReminderDialogBinding
 import com.camu.finanzapp.util.ReminderItem
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
-import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.util.Locale.Category
+
 
 class ReminderDialog (
     private val newReminder: Boolean = true,
     private val reminder: ReminderEntity = ReminderEntity(
-        title = "",
-        category = "",
-        date = "",
+        reminderTitle = "",
+        reminderCategory = "",
+        reminderDate = "",
         hour = "",
-        mount = "",
-        userReminderId = ""
+        reminderMount = 0.0,
+        userEmailReminder = "",
+        userId = 1
     ),
     private val updateUI: ()-> Unit,
     private val message: (String) -> Unit
@@ -60,7 +58,7 @@ class ReminderDialog (
 
     private var saveButton: Button? = null
 
-    private lateinit var repository: ReminderRepository
+    private lateinit var repository: DataBaseRepository
 
     private var spinnerItemSelected: String = "Renta/Hipoteca"
 
@@ -79,13 +77,16 @@ class ReminderDialog (
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _binding = ReminderDialogBinding.inflate(requireActivity().layoutInflater)
 
-        val app = requireActivity().application as RemindersDBApp
+        val app = requireActivity().application as DataBaseApplication
         repository = app.repository
 
         builder = AlertDialog.Builder(requireContext())
 
 
         firebaseAuth = FirebaseAuth.getInstance()
+
+
+        //////////////////////////////////////////////////////////////////////////////////
 
         val singInAccount : GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(requireContext())
 
@@ -122,12 +123,12 @@ class ReminderDialog (
             }
         }
         binding.apply {
-            editTextNameReminder.setText(reminder.title)
-            editTextMountReminder.setText(reminder.mount)
-            editTextDateReminder.setText(reminder.date)
+            editTextNameReminder.setText(reminder.reminderTitle)
+            editTextMountReminder.setText(reminder.reminderMount.toString())
+            editTextDateReminder.setText(reminder.reminderDate)
             editTextHourReminder.setText(reminder.hour)
 
-            val indexToSelect = categoryItems.indexOfFirst { it.text == reminder.category }
+            val indexToSelect = categoryItems.indexOfFirst { it.text == reminder.reminderCategory }
 
             // Seleccion del elemento por su índice
             if (indexToSelect != -1) {
@@ -142,11 +143,13 @@ class ReminderDialog (
             buildDialog("Guardar", "Cancelar", {
                 //Create (Guardar)
                 val category = spinnerItemSelected
-                reminder.title = binding.editTextNameReminder.text.toString()
-                reminder.category = category
-                reminder.mount = binding.editTextMountReminder.text.toString()
+                reminder.reminderTitle = binding.editTextNameReminder.text.toString()
+                reminder.reminderCategory = category
+                reminder.reminderMount = binding.editTextMountReminder.text.toString().toDouble()
+
+
                 if (isSelectedDate){
-                    reminder.date = selectedDate
+                    reminder.reminderDate = selectedDate
                 }
                 if (isSelectedTime){
                     reminder.hour = selectedTime
@@ -154,29 +157,42 @@ class ReminderDialog (
 
 
 
+
                 try {
                     lifecycleScope.launch {
+                        val userEmail = getUserEmail()
+                        val userId = repository.getUserIdByEmail(userEmail)
+                        if (userId != null){
+                            reminder.userId = userId
+                        }
+
                         repository.insertReminder(reminder)
+                        withContext(Dispatchers.Main) {
+                            updateUI()
+                        }
+
                     }
                     if (singInAccount!=null && firebaseAuth.currentUser!=null){
-                        reminder.userReminderId = firebaseAuth.currentUser?.email.toString()
+                        reminder.userEmailReminder = firebaseAuth.currentUser?.email.toString()
+
                     }else{
-                        val database = DBDataBase.getDataBase(requireContext())
-                        val repository = DBRepository(database.userDao())
                         val userEmail = getUserEmail()
 
                         lifecycleScope.launch {
                             val user = repository.getUserByEmail(userEmail)
-                            reminder.userReminderId = user?.email.toString()
+                            reminder.userEmailReminder = user?.userEmail.toString()
                         }
                     }
+
+
 
                     message("Recordatorio Guardado")
 
                     isSelectedDate = false
                     isSelectedTime = false
-                    //Actualizar la UI
                     updateUI()
+
+
 
                 }catch(e: IOException){
                     e.printStackTrace()
@@ -191,11 +207,11 @@ class ReminderDialog (
             buildDialog("Actualizar", "Borrar", {
                 //Update
                 val category = spinnerItemSelected
-                reminder.title = binding.editTextNameReminder.text.toString()
-                reminder.category = category
-                reminder.mount = binding.editTextMountReminder.text.toString()
+                reminder.reminderTitle = binding.editTextNameReminder.text.toString()
+                reminder.reminderCategory = category
+                reminder.reminderMount = binding.editTextMountReminder.text.toString().toDouble()
                 if (isSelectedDate){
-                    reminder.date = selectedDate
+                    reminder.reminderDate = selectedDate
                 }
                 if (isSelectedTime){
                     reminder.hour = selectedTime
@@ -225,7 +241,7 @@ class ReminderDialog (
 
                 AlertDialog.Builder(requireContext())
                     .setTitle("Confirmación")
-                    .setMessage("¿Realmente deseas eliminar el recordatorio ${reminder.title}?")
+                    .setMessage("¿Realmente deseas eliminar el recordatorio ${reminder.reminderTitle}?")
                     .setPositiveButton("Aceptar"){ _,_ ->
                         try {
                             lifecycleScope.launch {

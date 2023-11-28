@@ -17,14 +17,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.R
-import com.camu.finanzapp.databaseusers.data.DBRepository
-import com.camu.finanzapp.databaseusers.data.db.DBDataBase
-import com.camu.finanzapp.databaseusers.data.db.model.DBEntity
 import com.camu.finanzapp.databinding.FragmentRegisterBinding
 import kotlinx.coroutines.launch
 import org.mindrot.jbcrypt.BCrypt
 import android.content.res.Resources
 import com.camu.finanzapp.alerts.CustomDialogFragment
+import com.camu.finanzapp.database.DataBase
+import com.camu.finanzapp.database.DataBaseRepository
+import com.camu.finanzapp.database.UserEntity
 
 // Fragmento que representa la pantalla de registro
 class RegisterFragment : Fragment(R.layout.fragment_register) {
@@ -133,8 +133,15 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             //**********************************************************************************
 
             // Valida si el correo electrónico ya existe en la base de datos
-            val database = DBDataBase.getDataBase(requireContext())
-            val repository = DBRepository(database.userDao())
+            val database = DataBase.getDataBase(requireContext())
+            val repository = DataBaseRepository(
+                database.userDao(),
+                database.totalDao(),
+                database.reminderDao(),
+                database.incomeDao(),
+                database.expenseDao(),
+                database.budgetDao()
+            )
 
             lifecycleScope.launch {
                 val existingUser = repository.getUserByEmail(email)
@@ -155,13 +162,13 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                     val hashedPassword = BCrypt.hashpw(password, salt)
 
                     // Crea un objeto DBEntity con la contraseña hasheada y la sal
-                    val userEntity = DBEntity(
-                        nickname = user,
-                        name = name,
-                        lastname = lastName,
-                        sex = sex,
-                        email = email,
-                        key = hashedPassword // Almacena la contraseña hasheada en lugar de la contraseña en texto claro
+                    val userEntity = UserEntity(
+                        userNickname  = user,
+                        userName = name,
+                        userLastname = lastName,
+                        userSex = sex,
+                        userEmail = email,
+                        userKey = hashedPassword // Almacena la contraseña hasheada en lugar de la contraseña en texto claro
                     )
 
                     // Luego, continuar con la inserción del usuario en la base de datos

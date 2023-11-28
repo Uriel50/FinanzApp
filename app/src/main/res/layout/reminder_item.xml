@@ -59,7 +59,7 @@
                 android:id="@+id/tvMount"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="@id/guidelinevertical"
+                app:layout_constraintEnd_toEndOf="@id/guidelinevertical2"
                 android:textStyle="bold"
                 android:textColor="@color/colorPastelOrange"
                 android:text="$500"
@@ -102,7 +102,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.80" />
+                app:layout_constraintGuide_percent="0.75" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelinevertical2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.90" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

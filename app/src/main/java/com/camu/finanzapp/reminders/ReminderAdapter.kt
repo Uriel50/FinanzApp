@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.camu.finanzapp.R
-import com.camu.finanzapp.databasereminders.data.db.model.ReminderEntity
+import com.camu.finanzapp.database.ReminderEntity
 import com.camu.finanzapp.databinding.ReminderItemBinding
 import com.camu.finanzapp.util.ReminderItem
 import kotlin.coroutines.coroutineContext
@@ -33,12 +33,12 @@ class ReminderAdapter(private val onReminderClick: (ReminderEntity) -> Unit):Rec
 
         fun bind(reminder:ReminderEntity){
             binding.apply {
-                tvTitle.text = reminder.title
-                tvCategory.text = reminder.category
-                tvDate.text = reminder.date
-                tvMount.text = "$"+reminder.mount
+                tvTitle.text = reminder.reminderTitle
+                tvCategory.text = reminder.reminderCategory
+                tvDate.text = reminder.reminderDate
+                tvMount.text = "$"+reminder.reminderMount
 
-                val foundReminderItem = categoryItems.find { it.text == reminder.category }
+                val foundReminderItem = categoryItems.find { it.text == reminder.reminderCategory }
 
                 if(foundReminderItem != null){
                     val iconResourceId = foundReminderItem.imageResId

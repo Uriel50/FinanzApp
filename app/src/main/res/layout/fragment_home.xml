@@ -187,7 +187,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
                             android:layout_marginTop="15dp"
-                            android:text="Gastos del mes:"
+                            android:text="Gastos e Ingresos:"
                             android:textSize="12dp"
                             app:layout_constraintStart_toEndOf="@+id/icon_spend"
                             app:layout_constraintTop_toTopOf="parent"

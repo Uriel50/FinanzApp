@@ -14,8 +14,10 @@
     <color name="tabSelected">#0078f9</color>
     <color name="logoColor">#002f7f</color>
     <color name="backgroundColor">#EEEEEE</color>
-
+    <color name="colorExpense">#DB0000</color>
     <color name="colorPastelOrange">#ee5350</color>
+    <color name="colorGreen">#10BF18</color>
+
 
 
 

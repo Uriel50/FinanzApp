@@ -14,9 +14,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.camu.finanzapp.R
-import com.camu.finanzapp.databasereminders.data.ReminderRepository
-import com.camu.finanzapp.databasereminders.data.db.ReminderDatabase
-import com.camu.finanzapp.databasereminders.data.db.model.ReminderEntity
+import com.camu.finanzapp.database.BudgetEntity
+import com.camu.finanzapp.database.DataBase
+import com.camu.finanzapp.database.DataBaseRepository
+import com.camu.finanzapp.database.ReminderEntity
+import com.camu.finanzapp.database.TotalsEntity
 import com.camu.finanzapp.databinding.FragmentHomeBinding
 import com.camu.finanzapp.home.financedata.BalanceFragment
 import com.camu.finanzapp.home.financedata.ChartGeneralFragment
@@ -31,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+
 // Fragmento de la pantalla de inicio
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -38,18 +41,27 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private lateinit var binding: FragmentHomeBinding
     private var remindersDates : List<String> = emptyList()
-    private lateinit var database: ReminderDatabase
-    private lateinit var repository: ReminderRepository
+    private lateinit var database: DataBase
+    private lateinit var repository: DataBaseRepository
     private lateinit var reminderAdapter: ReminderAdapter
-    private var reminders : List<ReminderEntity> = emptyList()
+    private var reminders: List<ReminderEntity> = emptyList()
+    private var isStrategy: BudgetEntity?=null
+    private var isChartGeneral: TotalsEntity? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // Vincula la vista del fragmento con la clase FragmentHomeBinding
         binding = FragmentHomeBinding.bind(view)
-        database = ReminderDatabase.getDatabase(requireContext())
-        repository = ReminderRepository(database.ReminderDao())
+        database = DataBase.getDataBase(requireContext())
+        repository = DataBaseRepository(
+            database.userDao(),
+            database.totalDao(),
+            database.reminderDao(),
+            database.incomeDao(),
+            database.expenseDao(),
+            database.budgetDao()
+        )
         reminderAdapter = ReminderAdapter(){}
 
 
@@ -102,49 +114,60 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val fragmentManager = childFragmentManager
         val transaction = fragmentManager.beginTransaction()
         val containerBalanceGeneral = binding.frameBalanceGeneral
-        val isBalance = GlobalData.isBalance
 
-        if (isBalance){
-            val balanceFragment = BalanceFragment()
+        lifecycleScope.launch {
+            val email = getCurrentUserEmail()
+            isStrategy = repository.getBudgetByEmail(email)
+            if (isStrategy!=null){
+                val balanceFragment = BalanceFragment()
 
-            transaction.replace(containerBalanceGeneral.id,balanceFragment)
-            transaction.addToBackStack(null)
-            transaction.commit()
+                transaction.replace(containerBalanceGeneral.id,balanceFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+            else{
+
+                val newStrategy = NewStrategyFragment()
+                transaction.replace(containerBalanceGeneral.id,newStrategy)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+
         }
-        else{
 
-            val newStrategy = NewStrategyFragment()
-            transaction.replace(containerBalanceGeneral.id,newStrategy)
-            transaction.addToBackStack(null)
-            transaction.commit()
-
-        }
 
 
         //**********Graficas*******************************
 
-        val containerChartGeneral = binding.frameChartGeneral
-        val isChartGeneral = GlobalData.isChartGeneral
+        lifecycleScope.launch{
 
-        if (isChartGeneral){
+            val containerChartGeneral = binding.frameChartGeneral
+            val email = getCurrentUserEmail()
+            isChartGeneral = repository.getTotalByEmail(email)
 
-            val chartFragment = ChartGeneralFragment()
-            val fragmentManager = childFragmentManager
 
-            val transaction = fragmentManager.beginTransaction()
-            transaction.replace(containerChartGeneral.id, chartFragment)
-            transaction.addToBackStack(null)
-            transaction.commit()
+            if (isChartGeneral?.totalIncome != 0.0 && isChartGeneral?.totalExpense!=0.0 && isChartGeneral!=null){
+
+                val chartFragment = ChartGeneralFragment()
+                val fragmentManager = childFragmentManager
+
+                val transaction = fragmentManager.beginTransaction()
+                transaction.replace(containerChartGeneral.id, chartFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+            else{
+                val blancChartGeneral = R.layout.empy_chart_general
+
+                val inflater = LayoutInflater.from(requireContext())
+                val chartView = inflater.inflate(blancChartGeneral, containerChartGeneral, false)
+                containerChartGeneral.addView(chartView)
+            }
+
         }
-        else{
-            val blancChartGeneral = R.layout.empy_chart_general
-
-            val inflater = LayoutInflater.from(requireContext())
-            val chartView = inflater.inflate(blancChartGeneral, containerChartGeneral, false)
-            containerChartGeneral.addView(chartView)
 
 
-        }
 
 
         //*******Recordatorios*************
@@ -179,7 +202,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun upDateUiReminder(){
         lifecycleScope.launch {
             val userEmail = getCurrentUserEmail()
-            reminders = repository.getAllReminders().filter { it.userReminderId == userEmail }
+            reminders = repository.getAllReminders().filter { it.userEmailReminder == userEmail }
 
 
             if(reminders.isNotEmpty()){
@@ -213,7 +236,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         var smallestDiff = Long.MAX_VALUE
 
         for (reminder in reminders) {
-            dateFormat.parse(reminder.date)?.let {
+            dateFormat.parse(reminder.reminderDate)?.let {
                 val date = Calendar.getInstance().apply { time = it }
                 if (date.before(today)) {
                     date.set(Calendar.YEAR, today.get(Calendar.YEAR))

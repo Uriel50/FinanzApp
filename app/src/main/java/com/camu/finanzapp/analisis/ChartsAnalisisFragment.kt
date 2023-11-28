@@ -1,13 +1,18 @@
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.camu.finanzapp.R
 import com.camu.finanzapp.adapters.ViewPageIncomeExpenseAdapter
 import com.camu.finanzapp.adapters.ViewPagerAdapter
+import com.camu.finanzapp.database.DataBase
+import com.camu.finanzapp.database.DataBaseRepository
+import com.camu.finanzapp.database.TotalsEntity
 import com.camu.finanzapp.databinding.FragmentChartsAnalisisBinding
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Legend
@@ -19,6 +24,7 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.tabs.TabLayout
+import kotlinx.coroutines.launch
 import java.util.ArrayList
 
 class ChartsAnalisisFragment : Fragment() {
@@ -28,6 +34,12 @@ class ChartsAnalisisFragment : Fragment() {
     private val months = arrayOf("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio")
     private lateinit var viewPagerInEx: ViewPager
     private lateinit var tabLayoutInEX: TabLayout
+    private lateinit var database: DataBase
+    private lateinit var repository: DataBaseRepository
+    private var Total : TotalsEntity? = null
+    private var isChartGeneral: TotalsEntity? = null
+
+
 
 
     override fun onCreateView(
@@ -40,6 +52,16 @@ class ChartsAnalisisFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        database = DataBase.getDataBase(requireContext())
+        repository = DataBaseRepository(
+            database.userDao(),
+            database.totalDao(),
+            database.reminderDao(),
+            database.incomeDao(),
+            database.expenseDao(),
+            database.budgetDao()
+        )
 
         chart = binding.pcView
         chart.description.isEnabled = false
@@ -76,10 +98,10 @@ class ChartsAnalisisFragment : Fragment() {
             values2.add(BarEntry(i.toFloat(), (Math.random() * 10).toFloat()))
         }
 
-        val set1 = BarDataSet(values1, "Company A").apply {
+        val set1 = BarDataSet(values1, "Income").apply {
             color = requireContext().resources.getColor(R.color.buttoncolor)
         }
-        val set2 = BarDataSet(values2, "Company B").apply {
+        val set2 = BarDataSet(values2, "Expense").apply {
             color = requireContext().resources.getColor(R.color.alert)
         }
         chart.legend.isEnabled = false
@@ -96,42 +118,22 @@ class ChartsAnalisisFragment : Fragment() {
 
 
 
-        //***********LineBarIncome*********************
+        //***********LineBar*********************
+        lifecycleScope.launch {
+            val email = getUserEmail()
+            isChartGeneral = repository.getTotalByEmail(email)
 
-        val progressBarIncome = binding.progressBarIncome
-        val progressTextIncome= binding.progressTextIncome
-        val percentageTextIncome = binding.percentageTextIncome
+            if (isChartGeneral?.totalIncome != 0.0 && isChartGeneral?.totalExpense!=0.0 && isChartGeneral!=null){
+                Total = repository.getTotalByEmail(email)
+                setBarLineIncome(Total)
+                setBarLineExpnses(Total)
 
-        val total = 770
-        val income = 406
+            }else{
+                setBarLineExpnsesBlank()
+                setBarLineIncomeBlank()
+            }
 
-        progressBarIncome.max = total
-        progressBarIncome.progress = income
-
-        // Asumiendo que gasto debe ser un Double
-        progressTextIncome.text = String.format("$%,.2f", income.toDouble())
-
-        // Calcular el porcentaje y formatear el total correctamente.
-        val percentageIncome = (income.toDouble() / total.toDouble()) * 100
-        percentageTextIncome.text = String.format("%.0f%% de $%,.2f previstos", percentageIncome, total.toDouble())
-
-
-        //**********LineBarExpeses************
-        val progressBarExpenses = binding.progressBarExpeses
-        val progressTextExpenses= binding.progressTextExpenses
-        val percentageTextExpenses = binding.percentageTextExpenses
-
-        val expense = 200
-
-        progressBarExpenses.max = total
-        progressBarExpenses.progress = expense
-
-        // Asumiendo que gasto debe ser un Double
-        progressTextExpenses.text = String.format("$%,.2f", expense.toDouble())
-
-        // Calcular el porcentaje y formatear el total correctamente.
-        val percentageExpense = (expense.toDouble() / total.toDouble()) * 100
-        percentageTextExpenses.text = String.format("%.0f%% de $%,.2f previstos", percentageExpense, total.toDouble())
+        }
 
 
 
@@ -145,6 +147,92 @@ class ChartsAnalisisFragment : Fragment() {
         viewPagerInEx.adapter = adapterInEx
 
         tabLayoutInEX.setupWithViewPager(viewPagerInEx)
+
+    }
+
+
+    private fun getUserEmail(): String {
+        val sharedPrefKey = "user_email"
+
+        // Obtener el contexto de la Activity asociada
+        val sharedPreferences = activity?.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        // Utilizar el contexto para acceder a SharedPreferences, si está disponible
+        return sharedPreferences?.getString(sharedPrefKey, "") ?: ""
+    }
+
+    private fun setBarLineIncome(Total: TotalsEntity?){
+
+        var total = 0
+        var income = 0
+        if (Total!=null){
+            total = Total.balanceTotal.toInt()
+            income = Total.totalIncome.toInt()
+        }
+
+        binding.progressBarIncome.max = total
+        binding.progressBarIncome.progress = income
+
+        // Asumiendo que gasto debe ser un Double
+        binding.progressTextIncome.text = String.format("$%,.2f", income.toDouble())
+
+        // Calcular el porcentaje y formatear el total correctamente.
+        val percentageIncome = (income.toDouble() / total.toDouble()) * 100
+        binding.percentageTextIncome.text = String.format("%.0f%% de $%,.2f previstos", percentageIncome, total.toDouble())
+    }
+
+    private fun setBarLineExpnses(Total: TotalsEntity?){
+
+        var total = 0
+        var expense = 0
+        if (Total!=null){
+            total = Total.balanceTotal.toInt()
+            expense = Total.totalExpense.toInt()
+        }
+
+
+        binding.progressBarExpeses.max = total
+        binding.progressBarExpeses.progress = expense
+
+        // Asumiendo que gasto debe ser un Double
+        binding.progressTextExpenses.text = String.format("$%,.2f", expense.toDouble())
+
+        // Calcular el porcentaje y formatear el total correctamente.
+        val percentageExpense = (expense.toDouble() / total.toDouble()) * 100
+        binding.percentageTextExpenses.text = String.format("%.0f%% de $%,.2f previstos", percentageExpense, total.toDouble())
+
+    }
+
+    private fun setBarLineIncomeBlank(){
+
+        var total = 0
+        var income = 0
+
+        binding.progressBarIncome.max = total
+        binding.progressBarIncome.progress = income
+
+        // Asumiendo que gasto debe ser un Double
+        binding.progressTextIncome.text = String.format("$%,.2f", income.toDouble())
+
+        // Calcular el porcentaje y formatear el total correctamente.
+        val percentageIncome = (income.toDouble() / total.toDouble()) * 100
+        binding.percentageTextIncome.text = String.format("%.0f%% de $%,.2f previstos", percentageIncome, total.toDouble())
+    }
+
+    private fun setBarLineExpnsesBlank(){
+
+        var total = 0
+        var expense = 0
+
+        binding.progressBarExpeses.max = total
+        binding.progressBarExpeses.progress = expense
+
+        // Asumiendo que gasto debe ser un Double
+        binding.progressTextExpenses.text = String.format("$%,.2f", expense.toDouble())
+
+        // Calcular el porcentaje y formatear el total correctamente.
+        val percentageExpense = (expense.toDouble() / total.toDouble()) * 100
+        binding.percentageTextExpenses.text = String.format("%.0f%% de $%,.2f previstos", percentageExpense, total.toDouble())
 
     }
 

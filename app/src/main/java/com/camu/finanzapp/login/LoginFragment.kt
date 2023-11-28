@@ -12,15 +12,17 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.R
 import com.camu.finanzapp.alerts.CustomDialogFragment
+import com.camu.finanzapp.database.DataBase
+import com.camu.finanzapp.database.DataBaseRepository
+import com.camu.finanzapp.database.UserEntity
 import com.camu.finanzapp.databinding.FragmentLoginBinding
 import com.camu.finanzapp.home.HomeActivity
 import org.mindrot.jbcrypt.BCrypt
-import com.camu.finanzapp.databaseusers.data.DBRepository
-import com.camu.finanzapp.databaseusers.data.db.DBDataBase
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -29,6 +31,8 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
@@ -42,6 +46,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     private var _binding: FragmentLoginBinding? = null
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var database: DataBase
+    private lateinit var repository: DataBaseRepository
 
     private val resultLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -105,20 +111,27 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             val email = emailEditText.text.toString()
             val password = passwordEditText.text.toString()
 
-            val database = DBDataBase.getDataBase(requireContext())
+            database = DataBase.getDataBase(requireContext())
 
-            val repository = DBRepository(database.userDao())
+            repository = DataBaseRepository(
+                database.userDao(),
+                database.totalDao(),
+                database.reminderDao(),
+                database.incomeDao(),
+                database.expenseDao(),
+                database.budgetDao()
+            )
 
             // Busca el usuario por correo electrónico en la base de datos
 
             lifecycleScope.launch {
                 val user = repository.getUserByEmail(email)
-                if (user != null && BCrypt.checkpw(password, user.key)) {
+                if (user != null && BCrypt.checkpw(password, user.userKey)) {
                     // La contraseña es válida, el usuario puede iniciar sesión
                     // Puedes realizar alguna acción, como navegar a la actividad de inicio
                     val intent = Intent(context, HomeActivity::class.java)
                     saveUserEmail(email)
-                    Log.d("Correo y contraseña","${user.email}  ${BCrypt.checkpw(password, user.key)}")
+                    Log.d("Correo y contraseña","${user.userEmail}  ${BCrypt.checkpw(password, user.userKey)}")
                     startActivity(intent)
                 }
                 else{
@@ -189,6 +202,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         if (signInAccount != null && firebaseAuth.currentUser != null) {
             Toast.makeText(context, "Usuario autenticado", Toast.LENGTH_LONG).show()
             navigateToMain()
+            saveUserEmail(firebaseAuth.currentUser?.email.toString())
         }
     }
 
@@ -200,6 +214,39 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 .addOnSuccessListener {
                     Toast.makeText(context, "Tu cuenta se ha conectado con la aplicación", Toast.LENGTH_LONG).show()
                     navigateToMain()
+                    saveUserEmail(firebaseAuth.currentUser?.email.toString())
+                    database = DataBase.getDataBase(requireContext())
+
+                    repository = DataBaseRepository(
+                        database.userDao(),
+                        database.totalDao(),
+                        database.reminderDao(),
+                        database.incomeDao(),
+                        database.expenseDao(),
+                        database.budgetDao()
+                    )
+
+                    val userFirebase= UserEntity(
+                        userName = firebaseAuth.currentUser?.displayName.toString(),
+                        userEmail = firebaseAuth.currentUser?.email.toString(),
+                        userSex = "?",
+                        userKey = "****",
+                        userNickname = firebaseAuth.currentUser?.displayName.toString(),
+                        userLastname = firebaseAuth.currentUser?.displayName.toString()
+                    )
+
+                    CoroutineScope(Dispatchers.IO).launch {
+
+                        val existingUser = repository.getUserByEmail(firebaseAuth.currentUser?.email.toString())
+                        if (existingUser == null) {
+                            // El usuario no existe
+                            repository.insertUser(userFirebase)
+                        } else {
+                            // El usuario ya existe
+                        }
+                    }
+
+
                 }
                 .addOnFailureListener {
                     Toast.makeText(context, "No se pudo completar el registro", Toast.LENGTH_LONG).show()
@@ -213,6 +260,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         // Implementa la navegación hacia la actividad principal o la pantalla que sigue después del inicio de sesión.
 
         val intent = Intent(context, HomeActivity::class.java)
+
+
         startActivity(intent)
     }
 
