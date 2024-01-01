@@ -1,10 +1,12 @@
 package com.camu.finanzapp.movements.income
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.camu.finanzapp.R
@@ -12,6 +14,9 @@ import com.camu.finanzapp.database.DataBase
 import com.camu.finanzapp.database.DataBaseRepository
 import com.camu.finanzapp.database.IncomeEntity
 import com.camu.finanzapp.databinding.FragmentIncomeMovementsBinding
+import com.camu.finanzapp.home.RegisterStrategyActivity
+import com.camu.finanzapp.movements.FinanzappViewModel
+import com.camu.finanzapp.movements.expense.NewIncomeActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -23,6 +28,7 @@ class IncomeMovementsFragment : Fragment(R.layout.fragment_income_movements) {
     private lateinit var database: DataBase
     private lateinit var repository: DataBaseRepository
     private var incomes: List<IncomeEntity> = emptyList()
+    private val finanzappViewModel: FinanzappViewModel by viewModels()
 
     private lateinit var incomeAdapter: IncomeAdapter
 
@@ -55,6 +61,7 @@ class IncomeMovementsFragment : Fragment(R.layout.fragment_income_movements) {
         updateUI()
 
         binding.buttonNewIncomeMovements.setOnClickListener {
+
             val dialog = IncomeDialog(updateUI = {
                 updateUI()
             }, message = {text ->
@@ -64,6 +71,7 @@ class IncomeMovementsFragment : Fragment(R.layout.fragment_income_movements) {
         }
 
     }
+
 
 
     private fun incomeClicked(income: IncomeEntity){
@@ -78,22 +86,33 @@ class IncomeMovementsFragment : Fragment(R.layout.fragment_income_movements) {
 
 
     private fun updateUI(){
-        lifecycleScope.launch {
-            val userEmail = getCurrentUserEmail()
-            incomes = repository.getAllIncome().filter { it.userEmailIncome == userEmail }
-
-            if(incomes.isNotEmpty()){
-                // Hay por lo menos un registro
+//        lifecycleScope.launch {
+//            val userEmail = getCurrentUserEmail()
+////            incomes = repository.getAllIncome().filter { it.userEmailIncome == userEmail }
+//
+//            if(incomes.isNotEmpty()){
+//                // Hay por lo menos un registro
+//                binding.tvSinRegistros.visibility = View.INVISIBLE
+//                binding.blankIncomeMovementsIcon.visibility = View.INVISIBLE
+//
+//            } else {
+//                // No hay registros
+//                binding.tvSinRegistros.visibility = View.VISIBLE
+//                binding.blankIncomeMovementsIcon.visibility = View.VISIBLE
+//            }
+//            incomeAdapter.updateList(incomes)
+//        }
+        finanzappViewModel.AllIncomes.observe(viewLifecycleOwner) { incomes ->
+            if (incomes.isNotEmpty()) {
                 binding.tvSinRegistros.visibility = View.INVISIBLE
                 binding.blankIncomeMovementsIcon.visibility = View.INVISIBLE
-
             } else {
-                // No hay registros
                 binding.tvSinRegistros.visibility = View.VISIBLE
                 binding.blankIncomeMovementsIcon.visibility = View.VISIBLE
             }
             incomeAdapter.updateList(incomes)
         }
+
     }
 
     private fun message(text: String){

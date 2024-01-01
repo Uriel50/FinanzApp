@@ -5,7 +5,7 @@ import android.app.Application
 class DataBaseApplication (): Application(){
 
     // Base de datos de la aplicación, inicializada de forma diferida (lazy)
-    private val database by lazy {
+    val database by lazy {
         DataBase.getDataBase(this@DataBaseApplication)
     }
 
@@ -20,5 +20,6 @@ class DataBaseApplication (): Application(){
             budgetDao = database.budgetDao()
         )
     }
+
 
 }

@@ -9,14 +9,14 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.camu.finanzapp.R
-import com.camu.finanzapp.adapters.ViewPageIncomeExpenseAdapter
 import com.camu.finanzapp.adapters.ViewPageMovementsAdapter
 import com.camu.finanzapp.database.DataBase
 import com.camu.finanzapp.database.DataBaseRepository
-import com.camu.finanzapp.databinding.FragmentChartsAnalisisBinding
 import com.camu.finanzapp.databinding.FragmentMovementsListBinding
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.launch
+import androidx.fragment.app.viewModels
+
 
 
 class MovementsListFragment : Fragment(R.layout.fragment_movements_list) {
@@ -25,6 +25,7 @@ class MovementsListFragment : Fragment(R.layout.fragment_movements_list) {
     private lateinit var database: DataBase
     private lateinit var repository: DataBaseRepository
     private lateinit var viewPager: ViewPager
+    private val finanzappViewModel: FinanzappViewModel by viewModels()
     private lateinit var tabLayout: TabLayout
 
 
@@ -51,16 +52,29 @@ class MovementsListFragment : Fragment(R.layout.fragment_movements_list) {
             database.budgetDao()
         )
 
-        lifecycleScope.launch {
-            val email = getUserEmail()
-            var Budget = repository.getBudgetByEmail(email)
-            var Total = repository.getTotalByEmail(email)
+//        lifecycleScope.launch {
+//            val email = getUserEmail()
+//            var Budget = repository.getBudgetByEmail(email)
+//            var Total = repository.getTotalByEmail(email)
+//
+//
+//            binding.nameBudget.text = Budget?.nameBudget
+//            binding.mountBalanceTotal.text = "$"+Total?.balanceTotal.toString()
+//
+//        }
+
+        finanzappViewModel.BudgetByEmailLiveData.observe(viewLifecycleOwner, {budget->
+            binding.nameBudget.text = budget?.nameBudget
+        })
+
+        finanzappViewModel.TotalByEmailLiveData.observe(viewLifecycleOwner,{total->
+            binding.mountBalanceTotal.text = total?.balanceTotal.toString()
+        })
 
 
-            binding.nameBudget.text = Budget?.nameBudget
-            binding.mountBalanceTotal.text = "$"+Total?.balanceTotal.toString()
 
-        }
+
+
 
         viewPager = binding.viewPagerIncomeExpenseMovements
         tabLayout = binding.tabLayoutMovements

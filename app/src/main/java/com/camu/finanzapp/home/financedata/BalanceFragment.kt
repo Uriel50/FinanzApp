@@ -6,12 +6,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.R
 import com.camu.finanzapp.database.DataBase
 import com.camu.finanzapp.database.DataBaseRepository
 import com.camu.finanzapp.database.TotalsEntity
 import com.camu.finanzapp.databinding.FragmentBalanceBinding
+import com.camu.finanzapp.movements.FinanzappViewModel
 import kotlinx.coroutines.launch
 
 
@@ -21,6 +23,7 @@ class BalanceFragment : Fragment(R.layout.fragment_balance) {
     private lateinit var database: DataBase
     private lateinit var repository: DataBaseRepository
     private var Total : TotalsEntity? = null
+    private val finanzappViewModel: FinanzappViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -37,13 +40,20 @@ class BalanceFragment : Fragment(R.layout.fragment_balance) {
             database.budgetDao()
         )
 
-        lifecycleScope.launch {
-            val email = getUserEmail()
-            Total = repository.getTotalByEmail(email)
-            binding.mountBalanceIncome.text = "$"+Total?.totalIncome.toString()
-            binding.mountBalanceExpense.text = "-$"+Total?.totalExpense.toString()
-            binding.mountBalanceTotal.text = "$"+Total?.balanceTotal.toString()
+//        lifecycleScope.launch {
+//            val email = getUserEmail()
+//            Total = repository.getTotalByEmail(email)
+//            binding.mountBalanceIncome.text = "$"+Total?.totalIncome.toString()
+//            binding.mountBalanceExpense.text = "-$"+Total?.totalExpense.toString()
+//            binding.mountBalanceTotal.text = "$"+Total?.balanceTotal.toString()
+//        }
+
+        finanzappViewModel.TotalByEmailLiveData.observe(viewLifecycleOwner) { total ->
+            binding.mountBalanceIncome.text = "$" + total?.totalIncome.toString()
+            binding.mountBalanceExpense.text = "-$" + total?.totalExpense.toString()
+            binding.mountBalanceTotal.text = "$" + total?.balanceTotal.toString()
         }
+
     }
 
     private fun getUserEmail(): String {

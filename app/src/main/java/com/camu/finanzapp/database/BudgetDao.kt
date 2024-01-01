@@ -1,5 +1,6 @@
 package com.camu.finanzapp.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -28,6 +29,10 @@ interface BudgetDao {
     @Query("SELECT * FROM ${Constants.DATABASE_NAME_TABLE_BUDGET} WHERE user_email_budget = :email")
     suspend fun getBudgetByEmail(email: String): BudgetEntity
 
+
+    @Query("SELECT * FROM ${Constants.DATABASE_NAME_TABLE_BUDGET} WHERE user_email_budget = :email")
+    fun getBudgetByEmailLiveData(email: String): LiveData<BudgetEntity>
+
     //Update
     @Update
     suspend fun updateBudget(user: BudgetEntity)
@@ -35,4 +40,12 @@ interface BudgetDao {
     //Delete
     @Delete
     suspend fun deleteBudget(user: BudgetEntity)
+
+
+    //****Live
+    @Query("SELECT budget_id FROM ${Constants.DATABASE_NAME_TABLE_BUDGET} WHERE user_email_budget = :email")
+    fun getBudgetIdByEmailLiveData(email: String): Long?
+
+
+
 }

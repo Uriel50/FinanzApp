@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.database.BudgetEntity
@@ -20,7 +19,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.log
 
 class RegisterStrategyActivity(
     private val newUser: BudgetEntity = BudgetEntity(
@@ -137,7 +135,7 @@ class RegisterStrategyActivity(
                     newUser.userEmailBudget = userEmail
                 }
 
-                repository.inserBudget(newUser)
+                repository.insertBudget(newUser)
                 val user = repository?.getUserByEmail(userEmail)
                 val idBudgetByEmail = repository.getBudgetIdByEmail(userEmail)
                 if (user != null){

@@ -11,16 +11,24 @@ import android.widget.AdapterView
 import android.widget.Button
 import android.widget.Spinner
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.R
+import com.camu.finanzapp.database.DataBase
 import com.camu.finanzapp.database.DataBaseApplication
 import com.camu.finanzapp.database.DataBaseRepository
 import com.camu.finanzapp.database.IncomeEntity
+import com.camu.finanzapp.database.TotalsEntity
 import com.camu.finanzapp.databinding.IncomeDialogBinding
+import com.camu.finanzapp.movements.FinanzappViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -47,20 +55,35 @@ class IncomeDialog(
     private var saveButton: Button? = null
 
     private lateinit var repository: DataBaseRepository
+    private lateinit var database: DataBase
 
     private var spinnerItemSelected: String = "Salario"
     private lateinit var firebaseAuth: FirebaseAuth
+
+    private val finanzappViewModel: FinanzappViewModel by viewModels()
+
+    private val incomeCoroutineScope = CoroutineScope(Dispatchers.IO)
+
 
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _binding = IncomeDialogBinding.inflate(requireActivity().layoutInflater)
 
-        val app =requireActivity().application as DataBaseApplication
-        repository = app.repository
+
+        database = DataBase.getDataBase(requireContext())
+        repository = DataBaseRepository(
+            database.userDao(),
+            database.totalDao(),
+            database.reminderDao(),
+            database.incomeDao(),
+            database.expenseDao(),
+            database.budgetDao()
+        )
 
         builder = AlertDialog.Builder(requireContext())
 
         firebaseAuth = FirebaseAuth.getInstance()
+
 
         val singInAccount : GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(requireContext())
         var SpinnerCategory: Spinner
@@ -123,42 +146,42 @@ class IncomeDialog(
                 }
                 income.incomeMount = binding.editTextMountIncome.text.toString().toDouble()
 
+
                 try {
-                    lifecycleScope.launch {
+                    incomeCoroutineScope.launch {
+
                         val userEmail = getUserEmail()
                         val budgetId = repository.getBudgetIdByEmail(userEmail)
                         if (budgetId != null){
                             income.budgetId = budgetId
 
                         }
-
                         repository.insertIncome(income)
+
+                        val incomeSum = repository.getTotalIncomeByEmail(userEmail)
+                        val total = repository.getTotalByEmail(userEmail)
+
+
+                        if (total != null ) repository.updateBalanceTotal(total.balanceTotal+mountIncome,userEmail)
+
+                        repository.updateTotalIncome(incomeSum,userEmail)
+
+
+
                         withContext(Dispatchers.Main) {
                             updateUI()
                         }
 
-
-//                        val Incomes = repository.getAllIncome().filter { it.userEmailIncome == userEmail }
-//                        var totalIncomes = Incomes.sumByDouble { it.incomeMount }
-//                        var Total = repository.getTotalByEmail(userEmail)
-//
-//                        var balanceTotal = 0.0
-//                        if (Total !=null){
-//                            balanceTotal = Total.balanceTotal+mountIncome
-//                        }
-//
-//                        repository.updateBalanceTotal(balanceTotal, userEmail)
-//                        repository.updateTotalIncome(totalIncomes,userEmail)
-
-
                     }
+
+
                     if (singInAccount!=null && firebaseAuth.currentUser!=null){
                         income.userEmailIncome = firebaseAuth.currentUser?.email.toString()
 
                     }else{
                         val userEmail = getUserEmail()
 
-                        lifecycleScope.launch {
+                        incomeCoroutineScope.launch {
                             val user = repository.getUserByEmail(userEmail)
                             income.userEmailIncome = user?.userEmail.toString()
                         }
@@ -189,8 +212,8 @@ class IncomeDialog(
                 income.incomeDate = date
 
                 try {
-                    lifecycleScope.launch {
-                        repository.updateIncome(income)
+                    incomeCoroutineScope.launch{
+//                        repository.updateIncome(income)
 
 //                        val userEmail = getUserEmail()
 //                        val Incomes = repository.getAllIncome().filter { it.userEmailIncome == userEmail }
@@ -227,7 +250,7 @@ class IncomeDialog(
                     .setMessage("¿Realmente deseas eliminar el ingreso ${income.incomeName}?")
                     .setPositiveButton("Aceptar"){ _,_ ->
                         try {
-                            lifecycleScope.launch {
+                            incomeCoroutineScope.launch {
 //                                val userEmail = getUserEmail()
 //                                val Incomes = repository.getAllIncome().filter { it.userEmailIncome == userEmail }
 //                                var totalIncomes = Incomes.sumByDouble { it.incomeMount }
@@ -240,7 +263,7 @@ class IncomeDialog(
 //
 //                                repository.updateTotalIncome(totalIncomes,userEmail)
 //                                repository.updateBalanceTotal(balanceTotal,userEmail)
-                                repository.deleteIncome(income)
+//                                repository.deleteIncome(income)
 
 
                             }
@@ -270,6 +293,11 @@ class IncomeDialog(
 
 
 
+    }
+
+    override fun onDestroy() {
+        incomeCoroutineScope.coroutineContext.cancelChildren()
+        super.onDestroy()
     }
 
     fun getCurrentDateFormatted(): String {

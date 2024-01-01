@@ -1,5 +1,8 @@
 package com.camu.finanzapp.database
 
+import androidx.lifecycle.LiveData
+import androidx.room.Transaction
+
 class DataBaseRepository(
     private val userDao: UserDao,
     private val totalDao: TotalDao,
@@ -8,6 +11,7 @@ class DataBaseRepository(
     private val expenseDao: ExpenseDao,
     private val budgetDao: BudgetDao
 ) {
+
 
     //User operations*****************************************************
     // Función suspendida para insertar un usuario en la base de datos
@@ -23,7 +27,7 @@ class DataBaseRepository(
     }
     suspend fun getAllUsers(): List<UserEntity> = userDao.getAllUsers()
 
-    suspend fun getUserByEmail(email: String): UserEntity? {
+    suspend fun getUserByEmail(email: String):UserEntity? {
         return userDao.getUserByEmail(email)
     }
 
@@ -44,14 +48,27 @@ class DataBaseRepository(
         incomeDao.insertIncome(income)
     }
 
+    fun getAllIncomeLiveData(email: String): LiveData<List<IncomeEntity>> = incomeDao.getAllIncomeLiveData(email)
+
     suspend fun getAllIncome(): List<IncomeEntity> = incomeDao.getAllIncome()
 
-    suspend fun updateIncome(income: IncomeEntity) {
+    suspend fun updateIncome(income:IncomeEntity) {
         incomeDao.updateIncome(income)
     }
 
     suspend fun deleteIncome(income: IncomeEntity) {
         incomeDao.deleteIncome(income)
+    }
+    suspend fun getTotalIncomeByEmail(email: String): Double {
+        return incomeDao.getTotalIncomeByEmail(email) ?: 0.0
+    }
+
+    suspend fun getIncomesByCategory(email: String, category: String): Double {
+        return incomeDao.getIncomesByCategory(email, category)
+    }
+
+    suspend fun getIncomesByMonth(email: String, month: String): Double {
+        return incomeDao.getIncomesByMonth(email, month)
     }
 
     //Expense operations ****************************************************
@@ -69,6 +86,20 @@ class DataBaseRepository(
     suspend fun deleteExpense(expense: ExpenseEntity) {
         expenseDao.deleteExpense(expense)
     }
+    suspend fun getTotalExpenseByEmail(email: String): Double {
+        return expenseDao.getTotalExpenseByEmail(email) ?: 0.0
+    }
+
+    fun getAllExpenseLiveData(email: String): LiveData<List<ExpenseEntity>> = expenseDao.getAllExpenseLiveData(email)
+
+
+    suspend fun getExpensesByCategory(email: String, category: String): Double {
+        return expenseDao.getExpensesByCategory(email, category)
+    }
+    suspend fun getExpensesByMonth(email: String, month: String): Double {
+        return expenseDao.getExpensesByMonth(email, month)
+    }
+
 
     //Reminder operations ****************************************************
 
@@ -76,11 +107,7 @@ class DataBaseRepository(
         reminderDao.insertReminder(reminder)
     }
 
-    suspend fun insertReminder(title: String, category:String, date:String,hour: String, mount: Double, userId: Long, userEmail: String){
-        reminderDao.insertReminder(ReminderEntity(reminderTitle = title, reminderCategory = category, reminderDate = date, reminderMount = mount, hour = hour, userId = userId, userEmailReminder = userEmail))
-    }
-
-
+    
 
     suspend fun getAllReminders(): List<ReminderEntity> = reminderDao.getAllReminders()
 
@@ -95,7 +122,7 @@ class DataBaseRepository(
 
     //Budget operations ****************************************************************************
 
-    suspend fun inserBudget(budget: BudgetEntity){
+    suspend fun insertBudget(budget:BudgetEntity){
         budgetDao.insertBudget(budget)
     }
     suspend fun getAllBudgets(): List<BudgetEntity> = budgetDao.getAllBudgets()
@@ -107,7 +134,7 @@ class DataBaseRepository(
         return budgetDao.getNameBudgetByEmail(id_user)
     }
 
-    suspend fun getBudgetByEmail(email: String): BudgetEntity? {
+    suspend fun getBudgetByEmail(email: String): BudgetEntity {
         return budgetDao.getBudgetByEmail(email)
     }
     suspend fun updateBudget(budget: BudgetEntity){
@@ -116,7 +143,16 @@ class DataBaseRepository(
 
     suspend fun deleteBudget(budget: BudgetEntity){
         budgetDao.deleteBudget(budget)
+
     }
+    fun getBudgetByEmailLiveData(email: String): LiveData<BudgetEntity> {
+        return budgetDao.getBudgetByEmailLiveData(email)
+    }
+    fun getBudgetIdByEmailLiveData(email: String): Long? {
+        return budgetDao.getBudgetIdByEmailLiveData(email)
+    }
+
+
 
     //Total operations *****************************************************************************
 
@@ -136,19 +172,28 @@ class DataBaseRepository(
         return totalDao.getTotalById(idTotal)
     }
 
+    @Transaction
     suspend fun getTotalByEmail(email: String): TotalsEntity? {
         return totalDao.getTotalByEmail(email)
     }
 
+    @Transaction
     suspend fun updateTotalIncome(newTotalIncome: Double, email: String) {
         totalDao.updateTotalIncome(newTotalIncome, email)
     }
 
+    @Transaction
     suspend fun updateTotalExpense(newTotalExpense: Double, email: String) {
         totalDao.updateTotalExpense(newTotalExpense, email)
     }
 
+    @Transaction
     suspend fun updateBalanceTotal(newBalanceTotal: Double, email: String) {
         totalDao.updateBalanceTotal(newBalanceTotal, email)
     }
+    fun getTotalByEmailLiveData(email: String): LiveData<TotalsEntity> {
+        return totalDao.getTotalByEmailLiveData(email)
+    }
+
+
 }

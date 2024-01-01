@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.camu.finanzapp.R
@@ -14,6 +15,7 @@ import com.camu.finanzapp.database.DataBaseRepository
 import com.camu.finanzapp.database.ExpenseEntity
 import com.camu.finanzapp.database.IncomeEntity
 import com.camu.finanzapp.databinding.FragmentExpenseMovementsBinding
+import com.camu.finanzapp.movements.FinanzappViewModel
 import com.camu.finanzapp.movements.income.IncomeDialog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.material.snackbar.Snackbar
@@ -27,6 +29,7 @@ class ExpenseMovementsFragment : Fragment(R.layout.fragment_expense_movements) {
     private lateinit var repository: DataBaseRepository
     private var expenses: List<ExpenseEntity> = emptyList()
     private var isStrategy: BudgetEntity?=null
+    private val finanzappViewModel: FinanzappViewModel by viewModels()
 
     private lateinit var expenseAdapter: ExpenseAdapter
 
@@ -83,10 +86,23 @@ class ExpenseMovementsFragment : Fragment(R.layout.fragment_expense_movements) {
 
 
     private fun updateUI(){
-        lifecycleScope.launch {
-            val userEmail = getCurrentUserEmail()
-            expenses = repository.getAllExpenses().filter { it.userEmailExpense == userEmail }
-
+//        lifecycleScope.launch {
+//            val userEmail = getCurrentUserEmail()
+//            expenses = repository.getAllExpenses().filter { it.userEmailExpense == userEmail }
+//
+//            if(expenses.isNotEmpty()){
+//                // Hay por lo menos un registro
+//                binding.tvSinRegistros.visibility = View.INVISIBLE
+//                binding.blankExpenseMovementsIcon.visibility = View.INVISIBLE
+//
+//            } else {
+//                // No hay registros
+//                binding.tvSinRegistros.visibility = View.VISIBLE
+//                binding.blankExpenseMovementsIcon.visibility = View.VISIBLE
+//            }
+//            expenseAdapter.updateList(expenses)
+//        }
+        finanzappViewModel.AllExpense.observe(viewLifecycleOwner){expenses ->
             if(expenses.isNotEmpty()){
                 // Hay por lo menos un registro
                 binding.tvSinRegistros.visibility = View.INVISIBLE
@@ -99,6 +115,7 @@ class ExpenseMovementsFragment : Fragment(R.layout.fragment_expense_movements) {
             }
             expenseAdapter.updateList(expenses)
         }
+
     }
 
 

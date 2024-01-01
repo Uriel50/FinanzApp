@@ -35,7 +35,6 @@ class PerfilActivity : AppCompatActivity() {
         val singInAccount : GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(this)
 
         if (singInAccount!=null && firebaseAuth.currentUser!=null){
-            Toast.makeText(this,"usuario autenticado en activity perfil", Toast.LENGTH_LONG).show()
 
             Picasso.get()
                 .load(firebaseAuth.currentUser?.photoUrl)

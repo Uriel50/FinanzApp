@@ -17,9 +17,11 @@
         android:theme="@style/Theme.FinanzApp"
         tools:targetApi="31">
         <activity
+            android:name=".movements.expense.NewIncomeActivity"
+            android:exported="false" />
+        <activity
             android:name=".home.RegisterStrategyActivity"
             android:exported="false" />
-
         <activity
             android:name=".home.financedata.ChartGeneralFragment"
             android:exported="false" />
@@ -42,6 +44,5 @@
             android:name=".MainActivity"
             android:exported="true" />
     </application>
-
 
 </manifest>

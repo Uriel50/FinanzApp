@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
@@ -14,6 +15,7 @@ import com.camu.finanzapp.database.DataBase
 import com.camu.finanzapp.database.DataBaseRepository
 import com.camu.finanzapp.database.TotalsEntity
 import com.camu.finanzapp.databinding.FragmentChartsAnalisisBinding
+import com.camu.finanzapp.movements.FinanzappViewModel
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.LimitLine
@@ -38,6 +40,7 @@ class ChartsAnalisisFragment : Fragment() {
     private lateinit var repository: DataBaseRepository
     private var Total : TotalsEntity? = null
     private var isChartGeneral: TotalsEntity? = null
+    private val finanzappViewModel: FinanzappViewModel by viewModels()
 
 
 
@@ -61,6 +64,19 @@ class ChartsAnalisisFragment : Fragment() {
             database.incomeDao(),
             database.expenseDao(),
             database.budgetDao()
+        )
+
+
+        val categoryItems = listOf(
+            "Comida",
+            "Transporte",
+            "Vivienda",
+            "Entretenimiento",
+            "Salud",
+            "Educación",
+            "Impuestos",
+            "Viajes",
+            "Otros"
         )
 
         chart = binding.pcView
@@ -119,22 +135,17 @@ class ChartsAnalisisFragment : Fragment() {
 
 
         //***********LineBar*********************
-        lifecycleScope.launch {
-            val email = getUserEmail()
-            isChartGeneral = repository.getTotalByEmail(email)
 
-            if (isChartGeneral?.totalIncome != 0.0 && isChartGeneral?.totalExpense!=0.0 && isChartGeneral!=null){
-                Total = repository.getTotalByEmail(email)
-                setBarLineIncome(Total)
-                setBarLineExpnses(Total)
+        finanzappViewModel.TotalByEmailLiveData.observe(viewLifecycleOwner) { total ->
 
-            }else{
-                setBarLineExpnsesBlank()
+            if (total != null && total.totalExpense >= 0.0 && total.totalIncome >= 0.0) {
+                setBarLineIncome(total)
+                setBarLineExpenses(total)
+            } else {
+                setBarLineExpensesBlank()
                 setBarLineIncomeBlank()
             }
-
         }
-
 
 
         //********ChartIncome and Expense**************************
@@ -181,7 +192,7 @@ class ChartsAnalisisFragment : Fragment() {
         binding.percentageTextIncome.text = String.format("%.0f%% de $%,.2f previstos", percentageIncome, total.toDouble())
     }
 
-    private fun setBarLineExpnses(Total: TotalsEntity?){
+    private fun setBarLineExpenses(Total: TotalsEntity?){
 
         var total = 0
         var expense = 0
@@ -219,7 +230,7 @@ class ChartsAnalisisFragment : Fragment() {
         binding.percentageTextIncome.text = String.format("%.0f%% de $%,.2f previstos", percentageIncome, total.toDouble())
     }
 
-    private fun setBarLineExpnsesBlank(){
+    private fun setBarLineExpensesBlank(){
 
         var total = 0
         var expense = 0

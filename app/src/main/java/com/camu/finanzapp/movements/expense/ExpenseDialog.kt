@@ -13,6 +13,7 @@ import android.widget.Spinner
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.camu.finanzapp.R
+import com.camu.finanzapp.database.DataBase
 import com.camu.finanzapp.database.DataBaseApplication
 import com.camu.finanzapp.database.DataBaseRepository
 import com.camu.finanzapp.database.ExpenseEntity
@@ -20,7 +21,10 @@ import com.camu.finanzapp.databinding.ExpenseDialogBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -47,18 +51,29 @@ class ExpenseDialog (
     private var saveButton: Button? = null
 
     private lateinit var repository: DataBaseRepository
+    private lateinit var database: DataBase
     private var spinnerItemSelected: String = "Comida"
     private lateinit var firebaseAuth: FirebaseAuth
+    private val expenseCoroutineScope = CoroutineScope(Dispatchers.IO)
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _binding = ExpenseDialogBinding.inflate(requireActivity().layoutInflater)
 
-        val app = requireActivity().application as DataBaseApplication
-        repository = app.repository
+        database = DataBase.getDataBase(requireContext())
+        repository = DataBaseRepository(
+            database.userDao(),
+            database.totalDao(),
+            database.reminderDao(),
+            database.incomeDao(),
+            database.expenseDao(),
+            database.budgetDao()
+        )
 
         builder = AlertDialog.Builder(requireContext())
 
         firebaseAuth = FirebaseAuth.getInstance()
+
+
 
         val singInAccount : GoogleSignInAccount? = GoogleSignIn.getLastSignedInAccount(requireContext())
         var SpinnerCategory: Spinner
@@ -120,15 +135,26 @@ class ExpenseDialog (
                 expense.expenseMount = mountExpense
 
                 try {
-                    lifecycleScope.launch {
+
+
+                    expenseCoroutineScope.launch  {
                         val userEmail = getUserEmail()
                         val budgetId = repository.getBudgetIdByEmail(userEmail)
                         if (budgetId != null){
                             expense.budgetId = budgetId
 
                         }
-
                         repository.insertExpense(expense)
+
+                        val expenseSum = repository.getTotalExpenseByEmail(userEmail)
+                        val total = repository.getTotalByEmail(userEmail)
+
+
+                        if (total != null) repository.updateBalanceTotal(total.balanceTotal-mountExpense,userEmail)
+
+                        repository.updateTotalExpense(expenseSum,userEmail)
+
+
                         withContext(Dispatchers.Main) {
                             updateUI()
                         }
@@ -142,8 +168,6 @@ class ExpenseDialog (
 //                        }
 //                        repository.updateTotalExpense(totatExpenses,userEmail)
 //                        repository.updateBalanceTotal(balanceTotal,userEmail)
-
-
                     }
                     if (singInAccount!=null && firebaseAuth.currentUser!=null){
                         expense.userEmailExpense = firebaseAuth.currentUser?.email.toString()
@@ -151,19 +175,14 @@ class ExpenseDialog (
                     }else{
                         val userEmail = getUserEmail()
 
-                        lifecycleScope.launch {
+                        expenseCoroutineScope.launch {
                             val user = repository.getUserByEmail(userEmail)
                             expense.userEmailExpense = user?.userEmail.toString()
                         }
                     }
 
-
-
-
                     message("Gasto Guardado")
                     updateUI()
-
-
 
                 }catch(e: IOException){
                     e.printStackTrace()
@@ -185,7 +204,7 @@ class ExpenseDialog (
                 expense.expenseDate = date
 
                 try {
-                    lifecycleScope.launch {
+                    expenseCoroutineScope.launch {
                         repository.updateExpense(expense)
                         val userEmail = getUserEmail()
 
@@ -228,7 +247,7 @@ class ExpenseDialog (
                     .setMessage("¿Realmente deseas eliminar el gasto ${expense.expenseName}?")
                     .setPositiveButton("Aceptar"){ _,_ ->
                         try {
-                            lifecycleScope.launch {
+                            expenseCoroutineScope.launch {
 
 
 //                                val userEmail = getUserEmail()
@@ -268,6 +287,13 @@ class ExpenseDialog (
 
         return dialog
     }
+
+    override fun onDestroy() {
+        expenseCoroutineScope.coroutineContext.cancelChildren()
+        super.onDestroy()
+    }
+
+
     fun getCurrentDateFormatted(): String {
         val calendar = Calendar.getInstance()
         val day = calendar.get(Calendar.DAY_OF_MONTH)
