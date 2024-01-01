@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "655666775423",
+    "project_id": "finanzapp-e5fb4",
+    "storage_bucket": "finanzapp-e5fb4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655666775423:android:eccf36def9c30a0b90c64a",
+        "android_client_info": {
+          "package_name": "com.camu.finanzapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBJGqHw2V5ZrihBV5ArIpYyzufiOkrgsU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
